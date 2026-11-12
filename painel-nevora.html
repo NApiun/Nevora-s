@@ -1,0 +1,870 @@
+<title>Painel Névora</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: barra lateral com navegação por área + área de trabalho; ficha do cliente em gaveta lateral */
+:root{
+  --bg:#eef1f3; --surface:#ffffff; --surface-2:#f5f7f8; --line:#d9dfe3;
+  --fg:#18232b; --muted:#5d6b75; --accent:#1f5f6b; --accent-soft:#dcebed; --accent-fg:#ffffff;
+  --ok:#2f7a4b; --ok-soft:#e1f1e6; --warn:#a8660b; --warn-soft:#fbefd9; --bad:#b2392f; --bad-soft:#f8e1de;
+  --t-social:#9b4d7a; --t-estrutura:#1f5f6b; --t-nfc:#7a5c12;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11181d; --surface:#18222a; --surface-2:#1e2a33; --line:#2c3a44;
+  --fg:#e3eaee; --muted:#93a3ad; --accent:#5fb3bf; --accent-soft:#1d3a40; --accent-fg:#0d1a1e;
+  --ok:#6cc48d; --ok-soft:#1b3326; --warn:#e3a54b; --warn-soft:#3a2c14; --bad:#ec8378; --bad-soft:#3d1f1c;
+  --t-social:#e08bbb; --t-estrutura:#5fb3bf; --t-nfc:#d9b45a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11181d; --surface:#18222a; --surface-2:#1e2a33; --line:#2c3a44;
+  --fg:#e3eaee; --muted:#93a3ad; --accent:#5fb3bf; --accent-soft:#1d3a40; --accent-fg:#0d1a1e;
+  --ok:#6cc48d; --ok-soft:#1b3326; --warn:#e3a54b; --warn-soft:#3a2c14; --bad:#ec8378; --bad-soft:#3d1f1c;
+  --t-social:#e08bbb; --t-estrutura:#5fb3bf; --t-nfc:#d9b45a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:14px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+aside{background:var(--surface);border-right:1px solid var(--line);padding:20px 14px;display:flex;flex-direction:column;gap:20px;position:sticky;top:0;height:100vh}
+.brand{font-family:var(--display);font-size:24px;font-weight:700;letter-spacing:-.02em;padding:0 8px}
+.brand small{display:block;font-family:var(--body);font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+nav{display:flex;flex-direction:column;gap:2px}
+nav button{all:unset;cursor:pointer;padding:9px 10px;border-radius:6px;color:var(--muted);font-weight:500;display:flex;justify-content:space-between;gap:8px}
+nav button:hover{background:var(--surface-2);color:var(--fg)}
+nav button[aria-current="true"]{background:var(--accent-soft);color:var(--fg)}
+nav .count{font-family:var(--mono);font-size:12px}
+nav .count.bad{color:var(--bad)}
+.who{margin-top:auto;display:flex;flex-direction:column;gap:6px}
+.who label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+select,input,textarea{background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%}
+textarea{min-height:64px;resize:vertical}
+main{padding-block:24px 48px;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px));min-width:0;display:flex;flex-direction:column;gap:20px}
+.top{display:flex;flex-wrap:wrap;gap:12px;align-items:end;justify-content:space-between}
+h1{font-family:var(--display);font-weight:700;font-size:30px;letter-spacing:-.02em;margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:2px 0 0}
+.btn{cursor:pointer;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:8px 14px;font-weight:500}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.btn.sm{padding:4px 10px;font-size:12px}
+.demo{font-size:12px;color:var(--warn);background:var(--warn-soft);padding:6px 10px;border-radius:6px}
+.row{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px;min-width:0}
+.kpi .l{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.kpi .v{font-family:var(--display);font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi .h{font-size:12px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;min-width:0}
+.panel h2{font-family:var(--display);font-size:17px;font-weight:700;margin:0 0 12px}
+.alerts{display:flex;flex-direction:column;gap:8px;list-style:none;margin:0;padding:0}
+.alerts li{display:flex;gap:10px;align-items:baseline;padding:8px 10px;border-radius:6px;background:var(--surface-2);cursor:pointer}
+.alerts li:hover{outline:1px solid var(--line)}
+.alerts .d{font-family:var(--mono);font-size:12px;white-space:nowrap;min-width:70px}
+.late{color:var(--bad)} .today{color:var(--warn)}
+.teams{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.team{border-top:3px solid var(--tc);padding-top:8px;display:flex;flex-direction:column;gap:4px}
+.team b{font-family:var(--display);font-size:15px}
+.team span{font-size:12px;color:var(--muted)}
+.team .big{font-family:var(--mono);font-size:20px;color:var(--fg)}
+/* abas */
+.tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.tabs button{all:unset;cursor:pointer;padding:8px 12px;border-bottom:2px solid transparent;color:var(--muted);font-weight:500;display:flex;gap:6px;align-items:center}
+.tabs button[aria-selected="true"]{color:var(--fg);border-color:var(--tc,var(--accent))}
+.tdot{width:8px;height:8px;border-radius:50%;background:var(--tc)}
+/* quadro */
+.board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(220px,1fr);gap:12px;overflow-x:auto;padding-bottom:8px}
+.col{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:8px;min-height:200px}
+.col.over{outline:2px dashed var(--accent)}
+.col header{display:flex;justify-content:space-between;font-weight:600;font-size:13px;padding:2px 4px 6px}
+.col header span{font-family:var(--mono);color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--tc);border-radius:6px;padding:10px;cursor:grab;display:flex;flex-direction:column;gap:6px}
+.card:hover{border-color:var(--accent);border-left-color:var(--tc)}
+.card .nm{font-weight:600}
+.card .sv{font-size:13px}
+.card .desc{font-size:12px;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:4px}
+.chip{font-size:11px;padding:2px 7px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);white-space:nowrap}
+.chip.ok{background:var(--ok-soft);border-color:transparent;color:var(--ok)}
+.chip.no{background:var(--bad-soft);border-color:transparent;color:var(--bad)}
+.chip.wa{background:var(--warn-soft);border-color:transparent;color:var(--warn)}
+.chip.team{border-color:var(--tc);color:var(--tc);background:transparent}
+.card .foot{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);gap:8px}
+.av{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--accent-fg);font-size:10px;font-weight:600;flex:none}
+/* tabelas */
+.filters{display:flex;flex-wrap:wrap;gap:8px}
+.filters>*{width:auto;flex:1 1 160px}
+.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;min-width:760px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500;background:var(--surface-2)}
+tbody tr[data-open]{cursor:pointer} tbody tr:hover{background:var(--surface-2)}
+td.num,th.num{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+.steps{display:flex;gap:3px;align-items:center}
+.steps i{width:18px;height:6px;border-radius:3px;background:var(--line)}
+.steps i.on{background:var(--t-nfc)}
+.score{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12px}
+.dots{display:inline-flex;gap:2px}.dots i{width:7px;height:7px;border-radius:2px;background:var(--line)}.dots i.on{background:var(--accent)}
+/* gaveta */
+.scrim{position:fixed;inset:0;background:rgba(10,20,25,.35);z-index:20}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(620px,100%);background:var(--surface);border-left:1px solid var(--line);z-index:21;overflow-y:auto;padding-block:calc(20px + env(safe-area-inset-top,0px)) calc(28px + env(safe-area-inset-bottom,0px));padding-left:22px;padding-right:max(22px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
+.drawer h2{font-family:var(--display);font-size:22px;margin:0}
+.dhead{display:flex;justify-content:space-between;gap:12px;align-items:start}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form .full{grid-column:1/-1}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field>span{font-size:12px;font-weight:500;color:var(--muted)}
+.hint{font-size:12px;color:var(--muted)}
+.hint.wa{color:var(--warn)}
+.checks{display:flex;flex-wrap:wrap;gap:6px}
+.checks label{display:flex;gap:6px;align-items:center;font-size:13px;padding:5px 9px;border:1px solid var(--line);border-radius:999px;cursor:pointer}
+.checks input{width:auto}
+.checks label:has(input:checked){background:var(--accent-soft);border-color:var(--accent)}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg label{flex:1;text-align:center;border:1px solid var(--line);border-radius:6px;padding:7px;cursor:pointer;font-size:13px;position:relative;white-space:nowrap}
+.seg input{position:absolute;opacity:0;width:1px;pointer-events:none}
+.seg label:has(input:checked){background:var(--accent-soft);border-color:var(--accent)}
+.diag{background:var(--surface-2);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.diag b{font-family:var(--display);font-size:16px}
+.diag ul{margin:0;padding-left:18px;font-size:13px;color:var(--muted)}
+h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:6px 0 0;font-weight:600}
+.svlist{display:flex;flex-direction:column;gap:8px}
+.svitem{border:1px solid var(--line);border-left:3px solid var(--tc);border-radius:6px;padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center}
+.svitem .t{font-weight:600}
+.svitem .s{font-size:12px;color:var(--muted)}
+.svitem .v{font-family:var(--mono);font-size:12px;text-align:right}
+.addsv{background:var(--surface-2);border:1px dashed var(--line);border-radius:8px;padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.addsv .full{grid-column:1/-1}
+.nfcgrid{display:grid;grid-template-columns:1fr 80px;gap:6px 10px;align-items:center}
+.nfcgrid label{display:flex;gap:8px;align-items:center;font-size:13px}
+.nfcgrid input[type=checkbox]{width:auto}
+.hist{list-style:none;margin:0;padding:0;border-left:2px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.hist li{padding-left:12px;font-size:13px}
+.hist time{display:block;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:9px 16px;border-radius:6px;z-index:30;font-weight:500}
+.empty{color:var(--muted);padding:12px}
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  aside{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  nav{flex-direction:row;flex-wrap:wrap}
+  .who{margin:0;flex:1 1 180px}
+  main{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid2,.teams{grid-template-columns:1fr}
+  .form,.addsv{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:no-preference){.drawer{animation:in .18s ease-out}@keyframes in{from{transform:translateX(24px);opacity:.6}}}
+[hidden]{display:none!important}
+.drawer.narrow{width:min(480px,100%)}
+.chip.solid{background:var(--ok);color:var(--surface)}
+.fgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.fgrid>*{width:auto}
+fieldset[disabled] input,fieldset[disabled] select,fieldset[disabled] textarea{opacity:.75}
+@media (max-width:900px){.fgrid{grid-template-columns:1fr 1fr}}
+.task{border:1px solid var(--line);border-left:4px solid var(--tc,var(--line));border-radius:10px;padding:10px 12px;background:var(--surface);display:flex;flex-direction:column;gap:6px}
+.task.done{opacity:.6}
+.task.done .task-main b{text-decoration:line-through}
+.task-top{display:flex;gap:10px;align-items:flex-start}
+.tcheck{width:20px;height:20px;flex:none;margin-top:2px;cursor:pointer}
+.task-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.linkbtn{all:unset;cursor:pointer;color:var(--accent,inherit);text-decoration:underline;font-size:13px}
+.linkbtn:focus-visible{outline:2px solid currentColor}
+.tasks-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.tasks-grid.one{grid-template-columns:1fr}
+.tgroup{margin-bottom:18px}
+.tgroup h2{font-size:14px;margin:0 0 8px}
+.chip.pri-urgente{background:var(--bad);color:var(--surface)}
+.chip.pri-alta{background:var(--warn);color:var(--surface)}
+.progress{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.progress i{display:block;height:100%;background:var(--ok)}
+.minitasks{list-style:none;padding:0;margin:4px 0 0;font-size:13px}
+.minitasks li.done{text-decoration:line-through;opacity:.6}
+.seg.wrap{flex-wrap:wrap}
+.aprov{border:1px solid var(--line);border-left:4px solid var(--tc,var(--line));border-radius:10px;padding:12px;margin-bottom:10px;background:var(--surface)}
+.preview{border:1px dashed var(--line);border-radius:10px;padding:12px;margin-top:10px}
+</style>
+
+<div class="app">
+  <aside>
+    <div class="brand">Névora<small>Painel interno</small></div>
+    <nav id="nav">
+      <button data-view="tarefas">Minhas tarefas <span class="count" id="cTar"></span></button>
+      <button data-view="geral">Visão geral</button>
+      <button data-view="producao">Produção</button>
+      <button data-view="nfc">Placas NFC</button>
+      <button data-view="clientes">Clientes</button>
+      <button data-view="aprovacoes" data-only="gestao">Aprovações <span class="count" id="cApr"></span></button>
+      <button data-view="financeiro" data-only="gestao">Financeiro <span class="count bad" id="cFin"></span></button>
+      <button data-view="comissoes" data-only="gestao">Comissões <span class="count" id="cCom"></span></button>
+      <button data-view="meufin" data-only="colab">Meu financeiro</button>
+    </nav>
+    <div class="who">
+      <label for="me">Você está como</label>
+      <select id="me"></select>
+    </div>
+  </aside>
+  <main id="main"></main>
+</div>
+<div id="layer"></div>
+
+<script>
+/* ---------- configuração ---------- */
+const TEAMS={
+  estrutura:{nome:"Produção",cor:"var(--t-estrutura)",etapas:["Briefing","Desenvolvimento","Aprovação do cliente","Entregue"]},
+  social:{nome:"Social media",cor:"var(--t-social)",etapas:["Briefing","Planejamento","Produzindo conteúdo","Rodando"]},
+  nfc:{nome:"Placas NFC",cor:"var(--t-nfc)",etapas:["Venda fechada","Arte","Na gráfica","Pronta","Instalada"]}
+};
+const PEOPLE=[
+  {nome:"Gestão",equipe:null},
+  {nome:"Bruno Lima",equipe:"estrutura",dev:true},{nome:"Felipe Rocha",equipe:"estrutura",dev:true},{nome:"Gabriel Nunes",equipe:"estrutura",dev:true},
+  {nome:"Ana Costa",equipe:"social"},{nome:"Carla Reis",equipe:"social"}
+];
+const DEVS=PEOPLE.filter(p=>p.dev).map(p=>p.nome);
+const COLABS=PEOPLE.filter(p=>p.equipe).map(p=>p.nome);
+const ORIGENS={colaborador:"Colaborador",nevora:"Névora",gestor:"Gestor",parceiro:"Parceiro"};
+// Regra vigente (no banco fica versionada; cada contrato guarda a sua)
+const REGRA={versao:1,projNevora:5000,projDevs:5000,mensCaptador:6000,mensNevora:4000};
+const CATALOG=[
+  {id:"site",nome:"Site / landing page",equipe:"estrutura",mensal:true,desc:"Mensalidade cobre hospedagem, domínio e segurança"},
+  {id:"bot",nome:"Automação de WhatsApp",equipe:"estrutura",mensal:true,desc:"Robô com menu, pedidos, agendamentos e lembretes"},
+  {id:"painel",nome:"Painel administrativo",equipe:"estrutura",mensal:true},
+  {id:"cardapio",nome:"Cardápio digital",equipe:"estrutura",mensal:true},
+  {id:"wpp",nome:"Estrutura de WhatsApp Business",equipe:"estrutura",mensal:false,desc:"Perfil, catálogo, boas-vindas, respostas rápidas, etiquetas e QR code"},
+  {id:"gmn",nome:"Google Meu Negócio",equipe:"estrutura",mensal:false},
+  {id:"ig",nome:"Gestão de Instagram",equipe:"social",mensal:true},
+  {id:"redes",nome:"Gestão de redes sociais",equipe:"social",mensal:true},
+  {id:"placa",nome:"Placas NFC",equipe:"nfc",mensal:true}
+];
+const NFC_TIPOS=[{id:"google",nome:"Avaliação no Google"},{id:"insta",nome:"Instagram"},{id:"cardapio",nome:"Cardápio"},{id:"pix",nome:"PIX"},{id:"perso",nome:"Personalizada"}];
+const NFC_PADRAO={custo:15,preco:50,com:10};
+const STATUS_CLI=["Lead","Em negociação","Ativo","Pausado","Cancelado"];
+const ST_COM={prevista:"Prevista",pendente:"Pendente de recebimento",liberada:"Liberada",paga:"Paga",ajustada:"Ajustada",cancelada:"Cancelada"};
+const PRIOR={baixa:"Baixa",media:"Média",alta:"Alta",urgente:"Urgente"};
+const ST_TAR={a_fazer:"A fazer",fazendo:"Fazendo",revisao:"Em revisão",concluida:"Concluída"};
+// Modelos de tarefa por serviço (iguais aos do banco)
+const MODELOS={
+  site:[["Briefing com o cliente","estrutura",2,"alta",false],["Layout das páginas","estrutura",5,"media",true],["Aprovação do layout pelo cliente","estrutura",3,"media",true],["Desenvolvimento do site","estrutura",7,"media",true],["Publicação e domínio","estrutura",2,"alta",true],["Divulgar o site no Instagram do cliente","social",3,"media",true]],
+  bot:[["Mapear o atendimento do cliente","estrutura",2,"alta",false],["Montar o fluxo do robô","estrutura",5,"media",true],["Testar com o cliente","estrutura",3,"media",true],["Ativar e acompanhar a primeira semana","estrutura",7,"media",true]],
+  cardapio:[["Receber itens, fotos e preços","estrutura",2,"alta",false],["Montar o cardápio","estrutura",3,"media",true],["Aprovação do cliente","estrutura",2,"media",true],["Publicar e gerar QR code e NFC","estrutura",1,"media",true]],
+  placa:[["Arte das placas","nfc",2,"alta",false],["Aprovação da arte pelo cliente","nfc",2,"media",true],["Enviar para a gráfica","nfc",1,"media",true],["Programar as placas","nfc",2,"media",true],["Entregar e instalar no cliente","nfc",3,"media",true]],
+  ig:[["Briefing e identidade do perfil","social",3,"alta",false],["Planejamento do mês","social",3,"media",true],["Produção do conteúdo do mês","social",7,"media",true]]
+};
+
+const today=new Date();today.setHours(0,0,0,0);
+const d=n=>{const x=new Date(today);x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)};
+const cat=id=>CATALOG.find(c=>c.id===id);
+const cents=v=>Math.round((+v||0)*100);
+
+/* ---------- regras de distribuição (espelho das funções do banco) ---------- */
+function distribuir(total,pesos){
+  const s=pesos.reduce((a,b)=>a+b,0),raw=pesos.map(p=>total*p/s),res=raw.map(Math.floor);
+  let resto=total-res.reduce((a,b)=>a+b,0);
+  const ord=raw.map((r,i)=>[r-Math.floor(r),i]).sort((a,b)=>b[0]-a[0]||a[1]-b[1]);
+  for(let k=0;k<resto;k++)res[ord[k][1]]++;
+  return res;
+}
+const nfcTotal=(sv,k)=>(sv.nfc||[]).reduce((a,n)=>a+n.q*cents(n[k]),0);
+function feeCaptacao(sv){ // centavos
+  if(sv.equipe==="nfc")return ["colaborador","parceiro"].includes(sv.origem)?nfcTotal(sv,"com"):0;
+  return cents(sv.fee);
+}
+function captacaoFixa(sv){return feeCaptacao(sv)>0&&(sv.origem==="parceiro"||(sv.origem==="colaborador"&&!(sv.equipe==="estrutura"&&DEVS.includes(sv.captador))))}
+function calcular(tipo,sv,base,cap=0){
+  let L;
+  if(sv.equipe!=="estrutura")L=[{benef:"nevora",pct:100,valor:base}];
+  else if(tipo==="projeto"){
+    const devs=sv.devs?.length?sv.devs:DEVS;
+    const [nev,pool]=distribuir(base,[REGRA.projNevora,REGRA.projDevs]),partes=distribuir(pool,devs.map(()=>1));
+    L=[{benef:"nevora",pct:REGRA.projNevora/100,valor:nev},...devs.map((n,i)=>({benef:"colab",colab:n,pct:+(REGRA.projDevs/100/devs.length).toFixed(4),valor:partes[i]}))];
+  }else if(sv.origem==="colaborador"&&DEVS.includes(sv.captador)){
+    const [c,n]=distribuir(base,[REGRA.mensCaptador,REGRA.mensNevora]);
+    L=[{benef:"colab",colab:sv.captador,pct:REGRA.mensCaptador/100,valor:c},{benef:"nevora",pct:REGRA.mensNevora/100,valor:n}];
+  }else L=[{benef:"nevora",pct:100,valor:base}];
+  L.forEach(l=>l.natureza="distribuicao");
+  if(cap>0){const n=L.find(l=>l.benef==="nevora"),v=Math.min(cap,n.valor);n.valor-=v;if(base>0)n.pct=+(n.valor*100/base).toFixed(4);
+    if(v>0)L.push(sv.origem==="parceiro"?{benef:"parceiro",parceiro:sv.parceiro,natureza:"captacao",valor:v,pct:+(v*100/base).toFixed(4)}:{benef:"colab",colab:sv.captador,natureza:"captacao",valor:v,pct:+(v*100/base).toFixed(4)})}
+  return L;
+}
+// Prévia do contrato inteiro (não grava nada)
+function previa(sv){
+  const bp=cents(sv.unico)-nfcTotal(sv,"custo"),bm=cents(sv.mensal),fee=captacaoFixa(sv)?feeCaptacao(sv):0;
+  return {proj:bp>0?calcular("projeto",sv,bp,fee):[],mens:bm>0?calcular("mensalidade",sv,bm,cents(sv.unico)>0?0:fee):[]};
+}
+const nomeBenef=l=>l.benef==="nevora"?"Névora":l.benef==="parceiro"?parceiroNome(l.parceiro)+" (parceiro)":l.colab;
+
+/* ---------- dados de exemplo (fictícios) ---------- */
+function seed(){
+  let sid=0;
+  const S=(tipo,o)=>({id:++sid,tipo,equipe:cat(tipo).equipe,etapa:0,unico:0,parcelas:1,mensal:0,dia:10,inicio:d(-25),desc:"",status:"ativo",origem:"nevora",captador:null,parceiro:null,fee:0,devs:cat(tipo).equipe==="estrutura"?[...DEVS]:[],criadoPor:"Gestão",...o});
+  const C=[
+    {nome:"Padaria Trigo Dourado",seg:"Alimentação",cidade:"Campinas",contato:"Márcia",ig:"trigodourado",seg_ig:3200,site:"nao",wpp:"comum",wppNum:"(19) 99812-4410",status:"Ativo",
+      servicos:[S("placa",{resp:"Ana Costa",etapa:2,unico:500,mensal:29.9,origem:"colaborador",captador:"Ana Costa",criadoPor:"Ana Costa",nfc:[{t:"google",q:4,...NFC_PADRAO},{t:"pix",q:6,...NFC_PADRAO}],grafica:"Gráfica Ponto Certo"}),S("ig",{resp:"Ana Costa",etapa:1,mensal:890,origem:"colaborador",captador:"Ana Costa",criadoPor:"Ana Costa"})]},
+    {nome:"Clínica Sorriso Pleno",seg:"Saúde",cidade:"Valinhos",contato:"Dr. Paulo",ig:"sorrisopleno",seg_ig:11800,site:"desatualizado",wpp:"business",wppNum:"(19) 3201-7788",status:"Ativo",
+      servicos:[S("site",{resp:"Bruno Lima",etapa:1,unico:3000,mensal:150,origem:"colaborador",captador:"Bruno Lima",criadoPor:"Bruno Lima"}),S("bot",{resp:"Felipe Rocha",unico:1200,mensal:149,origem:"colaborador",captador:"Bruno Lima",devs:["Bruno Lima","Felipe Rocha"],criadoPor:"Bruno Lima",desc:"Agendamento de consultas e lembrete na véspera"})]},
+    {nome:"Hamburgueria Brasa 77",seg:"Alimentação",cidade:"Hortolândia",contato:"Rafael",ig:"brasa77",seg_ig:7400,site:"nao",wpp:"business",wppNum:"(19) 99301-7777",status:"Ativo",
+      servicos:[S("cardapio",{resp:"Gabriel Nunes",etapa:3,unico:450,mensal:59,origem:"gestor",atualiza:"cliente",devs:["Gabriel Nunes"]}),S("ig",{resp:"Carla Reis",etapa:3,mensal:990,origem:"gestor"})]},
+    {nome:"Moda Lírio",seg:"Varejo",cidade:"Campinas",contato:"Lívia",ig:"modalirio",seg_ig:24500,site:"sim",wpp:"business",wppNum:"(19) 99654-3321",status:"Ativo",
+      servicos:[S("bot",{resp:"Gabriel Nunes",etapa:3,unico:900,mensal:149,origem:"colaborador",captador:"Carla Reis",fee:90,criadoPor:"Carla Reis"}),S("redes",{resp:"Carla Reis",etapa:3,mensal:1500,origem:"colaborador",captador:"Carla Reis",criadoPor:"Carla Reis"})]},
+    {nome:"Escritório Mendes Advocacia",seg:"Serviços",cidade:"Indaiatuba",contato:"Dra. Helena",ig:"mendesadv",seg_ig:860,site:"desatualizado",wpp:"comum",wppNum:"(19) 3875-1100",status:"Ativo",
+      servicos:[S("site",{resp:"Felipe Rocha",unico:2800,parcelas:2,mensal:120,origem:"parceiro",parceiro:1,fee:250,inicio:d(-10)})]},
+    {nome:"Bar do Zé",seg:"Alimentação",cidade:"Sumaré",contato:"José",ig:"",seg_ig:0,site:"nao",wpp:"comum",wppNum:"(19) 99770-1212",status:"Em negociação",
+      servicos:[S("placa",{resp:"Felipe Rocha",status:"pendente",unico:450,mensal:49.9,origem:"colaborador",captador:"Felipe Rocha",criadoPor:"Felipe Rocha",inicio:d(0),nfc:[{t:"cardapio",q:8,...NFC_PADRAO},{t:"perso",q:1,...NFC_PADRAO}],desc:"Placa no balcão que abre o WhatsApp já com a mensagem de pedido",grafica:"Gráfica Ponto Certo"})]},
+    {nome:"Studio Kaya Pilates",seg:"Bem-estar",cidade:"Campinas",contato:"Kaya",ig:"studiokaya",seg_ig:2100,site:"nao",wpp:"comum",wppNum:"(19) 98123-0099",status:"Em negociação",
+      servicos:[S("site",{resp:"Bruno Lima",status:"pendente",unico:2500,mensal:120,origem:"colaborador",captador:"Ana Costa",fee:200,criadoPor:"Ana Costa",inicio:d(0),devs:["Bruno Lima","Gabriel Nunes"]})]}
+  ].map((c,i)=>({...c,id:i+1,obs:"",hist:[{em:d(-25+i),txt:"Cliente cadastrado"}]}));
+  const st={me:"Gestão",view:"geral",team:"estrutura",clientes:C,parceiros:[{id:1,nome:"Contador João Prado",contato:"(19) 99100-2233"}],pag:[],rec:[],com:[],rep:[],tar:[],feed:[],seq:100};
+  C.forEach(c=>c.servicos.filter(s=>s.status==="ativo").forEach(s=>ativarServico(st,c,s,true)));
+  // tarefas já andando conforme a etapa do serviço
+  st.tar.forEach(t=>{const s=svById(cliByIdS(st,t.cli),t.sv);const total=st.tar.filter(x=>x.sv===t.sv&&x.cli===t.cli).length;const feitas=Math.round(total*s.etapa/(TEAMS[s.equipe].etapas.length-1));if(t.ordem<=feitas){t.status="concluida";t.resp=t.resp||s.resp}else if(t.ordem===feitas+1&&t.setor===s.equipe){t.status="fazendo";t.resp=t.resp||s.resp}});
+  st.tar.find(t=>t.status==="fazendo")?.comentarios.push({autor:"Bruno Lima",texto:"Cliente pediu para trocar a cor principal para azul.",em:d(-1)});
+  // recebimentos de exemplo
+  const naoPagos=new Set([st.pag.find(p=>p.cli===2&&p.tipo==="Mensal").id]);
+  st.pag.forEach(p=>{if(naoPagos.has(p.id))return;if((p.tipo==="Único"&&p.venc<=d(0))||p.venc<d(-10))receber(st,p.id,{valor:p.valor,imp:p.valor*0.06,tax:0,forma:"PIX",ref:"exemplo-"+p.id,em:p.venc},true)});
+  const lib=st.com.filter(c=>c.colab==="Bruno Lima"&&c.status==="liberada"&&c.tipo==="projeto");
+  if(lib.length)repassar(st,"c:Bruno Lima",lib.map(c=>c.id),{forma:"PIX",ref:"E2E-exemplo",em:d(-5)},true);
+  return st;
+}
+
+/* ---------- operações ---------- */
+const nid=st=>st.seq++;
+const cliByIdS=(st,id)=>st.clientes.find(c=>c.id===id);
+function ativarServico(st,c,s,silencioso){
+  s.status="ativo";
+  if(s.equipe==="nfc"){s.unico=nfcTotal(s,"preco")/100}
+  if(cents(s.unico)>0)distribuir(cents(s.unico),Array(s.parcelas||1).fill(1)).forEach((v,i)=>{const dt=new Date(s.inicio+"T00:00");dt.setMonth(dt.getMonth()+i);st.pag.push({id:nid(st),cli:c.id,sv:s.id,tipo:"Único",desc:cat(s.tipo).nome+" (projeto"+((s.parcelas||1)>1?` ${i+1}/${s.parcelas}`:"")+")",valor:v/100,venc:dt.toISOString().slice(0,10),status:"aberta"})});
+  if(cents(s.mensal)>0){const ini=new Date(s.inicio+"T00:00");for(let m=0;;m++){const v=new Date(ini.getFullYear(),ini.getMonth()+m,s.dia||10);if(v>new Date(today.getFullYear(),today.getMonth()+1,0))break;if(v<new Date(ini.getFullYear(),ini.getMonth(),1))continue;st.pag.push({id:nid(st),cli:c.id,sv:s.id,tipo:"Mensal",desc:cat(s.tipo).nome+" (mensalidade)",valor:s.mensal,venc:v.toISOString().slice(0,10),status:"aberta"})}}
+  // tarefas a partir do modelo
+  let prazo=new Date(today),ant=null;
+  (MODELOS[s.tipo]||[]).forEach(([titulo,setor,dias,prior,dep],i)=>{prazo.setDate(prazo.getDate()+dias);
+    let resp=null;if(setor==="nfc")resp=s.criadoPor!=="Gestão"?s.criadoPor:s.resp;else if(setor==="estrutura"&&s.equipe==="estrutura"&&s.devs.length===1)resp=s.devs[0];else if(setor===s.equipe&&person(s.criadoPor)?.equipe===setor)resp=s.criadoPor;
+    const t={id:nid(st),cli:c.id,sv:s.id,titulo,setor,resp,prazo:prazo.toISOString().slice(0,10),prioridade:prior,status:"a_fazer",dep:dep?ant:null,ordem:i+1,criadoPor:"Gestão",comentarios:[]};st.tar.push(t);ant=t.id});
+  if(!silencioso){c.hist.push({em:d(0),txt:"Gestão aprovou "+cat(s.tipo).nome});log("aprovou "+cat(s.tipo).nome+" de "+c.nome)}
+}
+function saldoPag(st,p){return cents(p.valor)-st.rec.filter(r=>r.pag===p.id).reduce((a,r)=>a+r.valor,0)}
+function capDoRecebimento(st,c,s,tipo){
+  if(!captacaoFixa(s))return 0;const fee=feeCaptacao(s);
+  const ja=st.com.filter(l=>l.cli===c.id&&l.sv===s.id&&l.natureza==="captacao").reduce((a,l)=>a+l.valor,0);
+  if(cents(s.unico)>0){if(tipo!=="projeto")return 0;const rec=st.rec.filter(r=>{const p=st.pag.find(x=>x.id===r.pag);return p.cli===c.id&&p.sv===s.id&&p.tipo==="Único"}).reduce((a,r)=>a+r.valor,0);return Math.max(0,Math.floor(fee*rec/cents(s.unico))-ja)}
+  return Math.max(0,fee-ja);
+}
+function receber(st,pagId,f,silencioso){
+  const p=st.pag.find(x=>x.id===pagId);
+  if(f.ref&&st.rec.some(r=>r.ref===f.ref))return {erro:"Este pagamento já foi registrado (referência repetida). Nada foi duplicado."};
+  if(p.status==="cancelada")return {erro:"Cobrança cancelada não recebe pagamento."};
+  const valor=cents(f.valor),imp=cents(f.imp),tax=cents(f.tax);
+  if(valor<=0)return {erro:"Informe o valor recebido."};
+  if(valor>saldoPag(st,p))return {erro:"Valor maior que o saldo da cobrança ("+brlc(saldoPag(st,p))+")."};
+  const c=cliByIdS(st,p.cli),s=svById(c,p.sv),tipo=p.tipo==="Único"?"projeto":"mensalidade";
+  let custo=f.custo!==undefined&&f.custo!==""?cents(f.custo):0;
+  if((f.custo===undefined||f.custo==="")&&s.equipe==="nfc"&&tipo==="projeto"){const tot=st.rec.filter(r=>{const q=st.pag.find(x=>x.id===r.pag);return q.cli===c.id&&q.sv===s.id&&q.tipo==="Único"}).reduce((a,r)=>a+r.valor,0),ct=nfcTotal(s,"custo"),vp=cents(s.unico);custo=Math.floor(ct*(tot+valor)/vp)-Math.floor(ct*tot/vp)}
+  const base=valor-imp-tax-custo;if(base<0)return {erro:"Impostos, taxas e custos passam do valor recebido."};
+  const r={id:nid(st),pag:p.id,valor,imp,tax,custo,base,em:f.em||d(0),forma:f.forma,ref:f.ref||null,estorno_de:null};
+  st.rec.push(r);
+  calcular(tipo,s,base,capDoRecebimento(st,c,s,tipo)).forEach(l=>st.com.push({id:nid(st),rec:r.id,cli:c.id,sv:s.id,tipo,benef:l.benef,colab:l.colab||null,parceiro:l.parceiro||null,natureza:l.natureza,origem:s.origem,captador:s.captador,base,pct:l.pct,valor:l.valor,comp:p.venc.slice(0,7),em:r.em,status:"liberada",ajuste_de:null,repasse:null}));
+  p.status=saldoPag(st,p)<=0?"paga":"parcial";
+  if(!silencioso){c.hist.push({em:d(0),txt:"Gestão registrou recebimento de "+brlc(valor)+" ("+p.desc+")"});log("registrou recebimento de "+c.nome)}
+  return {ok:r};
+}
+function estornar(st,recId,motivo){
+  const o=st.rec.find(r=>r.id===recId);
+  if(st.rec.some(r=>r.estorno_de===recId))return {erro:"Este recebimento já foi estornado."};
+  const e={id:nid(st),pag:o.pag,valor:-o.valor,imp:-o.imp,tax:-o.tax,custo:-o.custo,base:-o.base,em:d(0),forma:o.forma,ref:null,estorno_de:o.id,motivo};
+  st.rec.push(e);
+  st.com.filter(c=>c.rec===o.id&&!c.ajuste_de).forEach(c=>st.com.push({...c,id:nid(st),rec:e.id,base:-c.base,valor:-c.valor,em:d(0),status:"ajustada",ajuste_de:c.id,repasse:null}));
+  const p=st.pag.find(x=>x.id===o.pag);p.status=saldoPag(st,p)>=cents(p.valor)?"aberta":"parcial";
+  const c=cliByIdS(st,p.cli);c.hist.push({em:d(0),txt:"Gestão estornou "+brlc(o.valor)+": "+motivo});log("estornou recebimento de "+c.nome);
+  return {ok:e};
+}
+const chaveBenef=l=>l.benef==="parceiro"?"p:"+l.parceiro:"c:"+l.colab;
+function repassar(st,chave,ids,f,silencioso){
+  const linhas=st.com.filter(c=>ids.includes(c.id));
+  if(linhas.some(c=>chaveBenef(c)!==chave||!["liberada","ajustada"].includes(c.status)||c.repasse))return {erro:"Só comissões liberadas de uma mesma pessoa entram no repasse."};
+  const total=linhas.reduce((a,c)=>a+c.valor,0);if(total<0)return {erro:"O repasse ficou negativo."};
+  const rp={id:nid(st),chave,valor:total,em:f.em||d(0),forma:f.forma,ref:f.ref,aprovado:"Gestão"};
+  st.rep.push(rp);linhas.forEach(c=>{c.repasse=rp.id;if(c.status==="liberada")c.status="paga"});
+  if(!silencioso)log("registrou repasse de "+brlc(total));
+  return {ok:rp};
+}
+function previstas(){
+  return state.pag.filter(p=>p.status==="aberta"||p.status==="parcial").flatMap(p=>{
+    const c=cliById(p.cli),s=svById(c,p.sv);if(!s||s.status!=="ativo")return [];
+    const saldo=saldoPag(state,p),tipo=p.tipo==="Único"?"projeto":"mensalidade";
+    const base=saldo-(s.equipe==="nfc"&&tipo==="projeto"?Math.floor(nfcTotal(s,"custo")*saldo/cents(s.unico)):0);
+    const cap=!captacaoFixa(s)?0:cents(s.unico)>0?(tipo==="projeto"?Math.floor(feeCaptacao(s)*saldo/cents(s.unico)):0):Math.max(0,feeCaptacao(s)-state.com.filter(l=>l.sv===s.id&&l.cli===c.id&&l.natureza==="captacao").reduce((a,l)=>a+l.valor,0));
+    return calcular(tipo,s,base,cap).map(l=>({id:"p"+p.id+(l.colab||l.parceiro||"n")+l.natureza,prev:true,cli:c.id,sv:s.id,tipo,benef:l.benef,colab:l.colab||null,parceiro:l.parceiro||null,natureza:l.natureza,origem:s.origem,captador:s.captador,base,pct:l.pct,valor:l.valor,comp:p.venc.slice(0,7),em:null,venc:p.venc,status:p.venc<d(0)?"pendente":"prevista"}));
+  });
+}
+
+
+/* ---------- utilidades ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const brl=n=>(+n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL",minimumFractionDigits:2,maximumFractionDigits:2});
+const brlc=c=>brl(c/100);
+const ini=n=>n.split(" ").map(p=>p[0]).slice(0,2).join("");
+const fmtD=s=>{if(!s)return"";const [y,m,dd]=s.split("-");return dd?dd+"/"+m:m+"/"+y};
+const person=n=>PEOPLE.find(p=>p.nome===n);
+const isGestao=()=>state.me==="Gestão";
+const myTeam=()=>person(state.me)?.equipe;
+const cliById=id=>state.clientes.find(c=>c.id===id);
+const svById=(c,id)=>c?.servicos.find(s=>s.id===id);
+const parceiroNome=id=>state.parceiros.find(p=>p.id===id)?.nome||"Parceiro";
+const allSv=()=>state.clientes.flatMap(c=>c.servicos.map(s=>({...s,c})));
+const ativos=()=>allSv().filter(s=>s.status==="ativo");
+const pStatus=p=>p.status==="paga"?"pago":p.status==="cancelada"?"cancelada":(p.venc<d(0)?"atrasado":(p.venc===d(0)?"hoje":"pendente"));
+const tc=t=>`--tc:${TEAMS[t].cor}`;
+const etapaNome=s=>TEAMS[s.equipe].etapas[s.etapa];
+const svNome=s=>cat(s.tipo).nome;
+const nfcResumo=s=>(s.nfc||[]).map(n=>n.q+"× "+NFC_TIPOS.find(t=>t.id===n.t).nome).join(", ");
+const origemTxt=s=>s.origem==="colaborador"?s.captador:s.origem==="parceiro"?parceiroNome(s.parceiro)+" (parceiro)":ORIGENS[s.origem];
+const pctTxt=p=>(+p).toLocaleString("pt-BR",{maximumFractionDigits:4})+"%";
+const participa=(s,eu)=>s.criadoPor===eu||s.captador===eu||s.resp===eu||(s.devs||[]).includes(eu);
+function score(c){let s=0;if(c.ig)s++;if(c.seg_ig>=5000)s++;if(c.site==="sim")s+=2;else if(c.site==="desatualizado")s++;if(c.wpp==="business")s++;return Math.min(5,s)}
+const dots=n=>'<span class="dots">'+[1,2,3,4,5].map(i=>`<i class="${i<=n?"on":""}"></i>`).join("")+"</span>";
+function log(txt){state.feed.unshift({em:new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}),txt:state.me+" "+txt});state.feed=state.feed.slice(0,12)}
+function toast(t){const e=document.createElement("div");e.className="toast";e.textContent=t;document.body.append(e);setTimeout(()=>e.remove(),2600)}
+function header(t,sub,extra=""){return `<div class="top"><div><h1>${t}</h1><p class="sub">${sub}</p></div><div class="row">${extra}<button class="btn primary" data-act="lancar">Lançar projeto</button></div></div>`}
+const pill=st=>({pago:'<span class="chip ok">Pago</span>',atrasado:'<span class="chip no">Atrasado</span>',hoje:'<span class="chip wa">Vence hoje</span>',pendente:'<span class="chip">A vencer</span>',cancelada:'<span class="chip">Cancelada</span>'})[st];
+const pillCom=st=>`<span class="chip ${({liberada:"ok",paga:"ok solid",pendente:"no",ajustada:"wa",cancelada:"",prevista:""})[st]}">${ST_COM[st]}</span>`;
+const pillPri=p=>`<span class="chip pri-${p}">${PRIOR[p]}</span>`;
+const kpi=(l,v,h,cls="")=>`<div class="kpi"><div class="l">${l}</div><div class="v ${cls}">${v}</div><div class="h">${h}</div></div>`;
+
+/* ---------- tarefas ---------- */
+const tarBloqueada=t=>t.dep&&state.tar.find(x=>x.id===t.dep)?.status!=="concluida";
+const tarAtrasada=t=>t.prazo&&t.prazo<d(0)&&t.status!=="concluida";
+const vejoTarefa=t=>{if(isGestao())return true;const eu=state.me,s=t.sv?svById(cliById(t.cli),t.sv):null;return t.resp===eu||t.criadoPor===eu||(!t.resp&&t.setor===myTeam())||(s&&participa(s,eu)&&t.setor===s.equipe)};
+function cardTarefa(t){
+  const c=cliById(t.cli),s=svById(c,t.sv),bloq=tarBloqueada(t),dep=state.tar.find(x=>x.id===t.dep);
+  return `<article class="task ${t.status==="concluida"?"done":""}" style="${tc(t.setor)}">
+    <div class="task-top"><label class="tcheck"><input type="checkbox" data-tdone="${t.id}" ${t.status==="concluida"?"checked":""} ${bloq?"disabled":""} aria-label="Concluir"></label>
+      <div class="task-main"><button class="linkbtn" data-tarefa="${t.id}">${esc(t.titulo)}</button>
+      <div class="sub">${c?esc(c.nome)+" · "+svNome(s):"Tarefa avulsa"}${t.setor!==s?.equipe&&s?" · passagem para "+TEAMS[t.setor].nome:""}</div></div></div>
+    <div class="meta">${pillPri(t.prioridade)}<span class="chip ${tarAtrasada(t)?"no":""}">${t.prazo?(tarAtrasada(t)?"Atrasada · ":"Prazo ")+fmtD(t.prazo):"Sem prazo"}</span>${bloq?`<span class="chip wa">Espera: ${esc(dep.titulo)}</span>`:`<span class="chip">${ST_TAR[t.status]}</span>`}${t.comentarios.length?`<span class="chip">${t.comentarios.length} comentário${t.comentarios.length>1?"s":""}</span>`:""}
+    ${t.resp?`<span class="av" title="${t.resp}">${ini(t.resp)}</span>`:`<button class="btn sm" data-assumir="${t.id}">Assumir</button>`}</div>
+  </article>`;
+}
+function viewTarefas(){
+  const F=state.ft||(state.ft={pessoa:isGestao()?"":"eu",setor:""});
+  let list=state.tar.filter(vejoTarefa);
+  if(F.pessoa==="eu")list=list.filter(t=>t.resp===state.me||(!t.resp&&t.setor===myTeam()));
+  else if(F.pessoa==="livre")list=list.filter(t=>!t.resp);
+  else if(F.pessoa)list=list.filter(t=>t.resp===F.pessoa);
+  if(F.setor)list=list.filter(t=>t.setor===F.setor);
+  const pr={urgente:0,alta:1,media:2,baixa:3},ord=a=>a.sort((x,y)=>(x.prazo||"9").localeCompare(y.prazo||"9")||pr[x.prioridade]-pr[y.prioridade]);
+  const abertas=list.filter(t=>t.status!=="concluida");
+  const grupos=[["Atrasadas",abertas.filter(t=>tarAtrasada(t)&&!tarBloqueada(t))],["Para hoje e esta semana",abertas.filter(t=>!tarAtrasada(t)&&!tarBloqueada(t)&&t.prazo<=d(7))],["Depois",abertas.filter(t=>!tarAtrasada(t)&&!tarBloqueada(t)&&(!t.prazo||t.prazo>d(7)))],["Esperando outra etapa",abertas.filter(tarBloqueada)],["Concluídas recentemente",list.filter(t=>t.status==="concluida").slice(-6)]];
+  return header(isGestao()?"Tarefas":"Minhas tarefas",isGestao()?"Tudo o que a equipe tem para fazer, por prazo e prioridade.":`${abertas.filter(t=>t.resp===state.me).length} tarefas com você e ${abertas.filter(t=>!t.resp).length} livres no seu setor.`,`<button class="btn" data-act="novaTarefa">Nova tarefa</button>`)+`
+  <div class="filters">
+    <select id="ftPessoa">${[["","Todas as pessoas"],["eu","Minhas e livres do meu setor"],["livre","Sem responsável"],...COLABS.map(n=>[n,n])].filter(([v])=>!(isGestao()&&v==="eu")).map(([v,l])=>`<option value="${v}" ${v===F.pessoa?"selected":""}>${l}</option>`).join("")}</select>
+    <select id="ftSetor"><option value="">Todos os setores</option>${Object.entries(TEAMS).map(([k,t])=>`<option value="${k}" ${k===F.setor?"selected":""}>${t.nome}</option>`).join("")}</select>
+  </div>
+  ${grupos.filter(([,g])=>g.length).map(([titulo,g])=>`<section class="tgroup"><h2>${titulo} <span class="count">${g.length}</span></h2><div class="tasks-grid">${ord(g).map(cardTarefa).join("")}</div></section>`).join("")||'<div class="panel empty">Nenhuma tarefa com esses filtros.</div>'}`;
+}
+function setStatusTarefa(t,status){
+  if(status!=="a_fazer"&&tarBloqueada(t))return toast("Esta tarefa espera \""+state.tar.find(x=>x.id===t.dep).titulo+"\" ser concluída");
+  t.status=status;if(!t.resp)t.resp=state.me;
+  if(status==="concluida"){t.concluidaEm=d(0);log("concluiu "+t.titulo);
+    const prox=state.tar.find(x=>x.dep===t.id);if(prox&&prox.setor!==t.setor)toast("Passou para "+TEAMS[prox.setor].nome+": "+prox.titulo)}
+  save();render();
+}
+function abrirTarefa(id){
+  const t=id?state.tar.find(x=>x.id===id):null,nova=!t,c=t&&cliById(t.cli),s=t&&svById(c,t.sv);
+  const pode=isGestao()||!t||t.resp===state.me||!t.resp||t.criadoPor===state.me;
+  $("#layer").innerHTML=`<div class="scrim" data-close></div><form class="drawer narrow" id="tf" autocomplete="off">
+    <div class="dhead"><div><h2>${nova?"Nova tarefa":esc(t.titulo)}</h2>${t?`<p class="sub">${c?esc(c.nome)+" · "+svNome(s):"Tarefa avulsa"} · ${TEAMS[t.setor].nome}</p>`:""}</div><button type="button" class="btn" data-close>Fechar</button></div>
+    <fieldset class="form" style="border:0;padding:0;margin:0" ${pode?"":"disabled"}>
+      <label class="field full"><span>Título</span><input id="t-titulo" name="titulo" required value="${esc(t?.titulo||"")}"></label>
+      ${nova?`<label class="field full"><span>Projeto (opcional)</span><select id="t-proj" name="proj"><option value="">Tarefa avulsa</option>${ativos().filter(s=>isGestao()||participa(s,state.me)).map(s=>`<option value="${s.c.id}:${s.id}">${esc(s.c.nome)} · ${svNome(s)}</option>`).join("")}</select></label>`:""}
+      <label class="field"><span>Setor</span><select id="t-setor" name="setor">${Object.entries(TEAMS).map(([k,x])=>`<option value="${k}" ${k===(t?.setor||myTeam()||"estrutura")?"selected":""}>${x.nome}</option>`).join("")}</select></label>
+      <label class="field"><span>Responsável</span><select id="t-resp" name="resp"><option value="">Sem responsável</option>${COLABS.map(n=>`<option ${n===(t?t.resp:(isGestao()?"":state.me))?"selected":""}>${n}</option>`).join("")}</select></label>
+      <label class="field"><span>Prazo</span><input id="t-prazo" name="prazo" type="date" value="${t?.prazo||d(3)}"></label>
+      <label class="field"><span>Prioridade</span><select id="t-pri" name="prioridade">${Object.entries(PRIOR).map(([k,v])=>`<option value="${k}" ${k===(t?.prioridade||"media")?"selected":""}>${v}</option>`).join("")}</select></label>
+      ${t?`<label class="field full"><span>Status</span><select id="t-status" name="status">${Object.entries(ST_TAR).map(([k,v])=>`<option value="${k}" ${k===t.status?"selected":""}>${v}</option>`).join("")}</select></label>`:""}
+      <label class="field full"><span>Descrição</span><textarea id="t-desc" name="descricao">${esc(t?.descricao||"")}</textarea></label>
+    </fieldset>
+    ${t&&tarBloqueada(t)?`<p class="hint wa">Esta tarefa começa quando "${esc(state.tar.find(x=>x.id===t.dep).titulo)}" for concluída.</p>`:""}
+    ${t?`<h3>Comentários</h3><ul class="hist">${t.comentarios.map(cm=>`<li><time>${fmtD(cm.em)} · ${esc(cm.autor)}</time>${esc(cm.texto)}</li>`).join("")||'<li class="hint">Nenhum comentário ainda.</li>'}</ul>
+      <div class="row" style="flex-wrap:nowrap"><input id="t-com" placeholder="Escreva um comentário"><button type="button" class="btn" data-comentar="${t.id}">Comentar</button></div>`:""}
+    <p class="hint late" id="tErr" hidden></p>
+    <div class="row">${t&&(isGestao()||t.criadoPor===state.me)?`<button type="button" class="btn" data-apagartar="${t.id}">Apagar</button>`:""}<button type="button" class="btn" data-close>Cancelar</button>${pode?`<button class="btn primary" type="submit">${nova?"Criar tarefa":"Salvar"}</button>`:""}</div>
+  </form>`;
+  $("#tf").addEventListener("submit",e=>{e.preventDefault();const fd=new FormData(e.target);
+    const dados={titulo:fd.get("titulo").trim(),setor:fd.get("setor"),resp:fd.get("resp")||null,prazo:fd.get("prazo"),prioridade:fd.get("prioridade"),descricao:fd.get("descricao")};
+    if(nova){const [ci,si]=(fd.get("proj")||":").split(":");state.tar.push({id:nid(state),cli:+ci||null,sv:+si||null,...dados,status:"a_fazer",dep:null,ordem:99,criadoPor:state.me,comentarios:[]});log("criou a tarefa "+dados.titulo)}
+    else{const st=fd.get("status");if(st!=="a_fazer"&&st!==t.status&&tarBloqueada(t)){$("#tErr").textContent="Esta tarefa ainda espera a etapa anterior.";$("#tErr").hidden=false;return}Object.assign(t,dados,{status:st});if(st==="concluida")t.concluidaEm=d(0)}
+    save();closeDrawer();render();toast(nova?"Tarefa criada":"Tarefa salva")});
+}
+
+/* ---------- visão geral ---------- */
+function viewGeral(){
+  const mes=d(0).slice(0,7),eu=state.me;
+  const minhasT=state.tar.filter(t=>t.status!=="concluida"&&(isGestao()||t.resp===eu));
+  const atrT=minhasT.filter(tarAtrasada);
+  if(isGestao()){
+    const recMes=state.rec.filter(r=>r.em.slice(0,7)===mes).reduce((a,r)=>a+r.valor,0);
+    const atras=state.pag.filter(p=>pStatus(p)==="atrasado");
+    const pend=allSv().filter(s=>s.status==="pendente");
+    const mrr=ativos().reduce((a,s)=>a+(+s.mensal||0),0);
+    return header("Olá, Gestão","Visão da Névora inteira.",'<span class="demo">Protótipo com dados fictícios</span>')+`
+    <div class="kpis">${kpi("Aguardando aprovação",pend.length,"projetos lançados pela equipe",pend.length?"today":"")}${kpi("Mensalidades ativas",brl(mrr),"contratado por mês")}${kpi("Recebido no mês",brlc(recMes),"recebimentos confirmados")}${kpi("Tarefas atrasadas",atrT.length,minhasT.length+" tarefas abertas",atrT.length?"late":"")}</div>
+    <div class="grid2">
+      <div class="panel"><h2>Projetos para aprovar</h2><ul class="alerts">${pend.map(s=>`<li data-act="aprovacoes"><span class="d">${esc(s.criadoPor.split(" ")[0])}</span><span><b>${esc(s.c.nome)}</b> · ${svNome(s)} · ${brl(s.equipe==="nfc"?nfcTotal(s,"preco")/100:s.unico)}</span></li>`).join("")||"<li>Nada aguardando.</li>"}</ul></div>
+      <div class="panel"><h2>Cobranças atrasadas</h2><ul class="alerts">${atras.map(p=>`<li data-open="${p.cli}"><span class="d late">${fmtD(p.venc)}</span><span><b>${esc(cliById(p.cli).nome)}</b> · ${esc(p.desc)} · ${brlc(saldoPag(state,p))}</span></li>`).join("")||'<li>Nenhuma cobrança atrasada.</li>'}</ul></div>
+    </div>
+    <div class="panel"><h2>Carga de tarefas por pessoa</h2><div class="teams" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr))">${COLABS.map(n=>{const ab=state.tar.filter(t=>t.resp===n&&t.status!=="concluida");return `<div class="team" style="${tc(person(n).equipe)}"><b>${n}</b><span class="big">${ab.length}</span><span>${ab.filter(tarAtrasada).length} atrasadas · ${TEAMS[person(n).equipe].nome}</span></div>`}).join("")}</div></div>`;
+  }
+  const minhas=state.com.filter(c=>c.colab===eu);
+  const prox=minhasT.filter(t=>!tarBloqueada(t)).sort((a,b)=>(a.prazo||"9").localeCompare(b.prazo||"9")).slice(0,5);
+  const meusLanc=allSv().filter(s=>s.criadoPor===eu);
+  return header("Olá, "+eu.split(" ")[0],`Setor ${TEAMS[myTeam()].nome}.`,'<span class="demo">Protótipo com dados fictícios</span>')+`
+  <div class="kpis">${kpi("Minhas tarefas",minhasT.length,atrT.length+" atrasadas",atrT.length?"late":"")}${kpi("Liberado para repasse",brlc(minhas.filter(c=>["liberada","ajustada"].includes(c.status)&&!c.repasse).reduce((a,c)=>a+c.valor,0)),"cliente já pagou")}${kpi("Previsto",brlc(previstas().filter(p=>p.colab===eu).reduce((a,p)=>a+p.valor,0)),"de cobranças em aberto")}${kpi("Recebido no mês",brlc(state.rep.filter(r=>r.chave==="c:"+eu&&r.em.slice(0,7)===mes).reduce((a,r)=>a+r.valor,0)),"repasses confirmados")}</div>
+  <div class="grid2">
+    <div class="panel"><h2>Próximas tarefas</h2><div class="tasks-grid one">${prox.map(cardTarefa).join("")||'<p class="hint">Nada com você agora.</p>'}</div></div>
+    <div class="panel"><h2>Meus lançamentos</h2><ul class="alerts">${meusLanc.map(s=>`<li data-open="${s.c.id}"><span class="d">${s.status==="pendente"?'<span class="today">Aguardando</span>':s.status==="recusado"?'<span class="late">Recusado</span>':"Aprovado"}</span><span><b>${esc(s.c.nome)}</b> · ${svNome(s)}</span></li>`).join("")||"<li>Você ainda não lançou projetos.</li>"}</ul></div>
+  </div>`;
+}
+
+/* ---------- produção ---------- */
+function viewProducao(){
+  const team=state.team,t=TEAMS[team];
+  const list=ativos().filter(s=>s.equipe===team&&(isGestao()||!state.soMeus||participa(s,state.me)));
+  return header("Produção","Cada card é um serviço aprovado. Arraste entre as etapas.",isGestao()?"":`<label class="row" style="gap:6px"><input type="checkbox" id="soMeus" style="width:auto" ${state.soMeus?"checked":""}>Só os meus</label>`)+
+  `<div class="tabs" role="tablist">${Object.entries(TEAMS).map(([k,x])=>`<button role="tab" data-team="${k}" aria-selected="${k===team}" style="${tc(k)}"><span class="tdot"></span>${x.nome}</button>`).join("")}</div>
+  <div class="board">${t.etapas.map((e,i)=>{const cs=list.filter(s=>s.etapa===i);return `<section class="col" data-etapa="${i}"><header>${e}<span>${cs.length}</span></header>${cs.map(s=>{const ts=state.tar.filter(x=>x.sv===s.id&&x.cli===s.c.id),feitas=ts.filter(x=>x.status==="concluida").length;return `
+    <article class="card" draggable="true" data-sv="${s.c.id}:${s.id}" data-open="${s.c.id}" style="${tc(s.equipe)}">
+      <div class="nm">${esc(s.c.nome)}</div><div class="sv">${svNome(s)}</div>
+      ${s.nfc?`<div class="desc">${nfcResumo(s)}</div>`:""}
+      ${ts.length?`<div class="progress" title="${feitas} de ${ts.length} tarefas"><i style="width:${100*feitas/ts.length}%"></i></div><div class="desc">${feitas} de ${ts.length} tarefas</div>`:""}
+      <div class="foot"><span>${(s.equipe==="estrutura"?s.devs:[s.resp]).map(n=>`<span class="av" title="${n}">${ini(n)}</span>`).join(" ")}</span><span>${s.mensal?brl(s.mensal)+"/mês":""}</span></div>
+    </article>`}).join("")}</section>`}).join("")}</div>`;
+}
+
+/* ---------- placas NFC ---------- */
+function viewNfc(){
+  const list=allSv().filter(s=>s.tipo==="placa"&&(isGestao()||participa(s,state.me)));
+  const tot=list.reduce((a,s)=>a+(s.nfc||[]).reduce((b,n)=>b+n.q,0),0);
+  return header("Placas NFC","Vendas, custo, comissão do vendedor e andamento na gráfica. O pedido à gráfica continua sendo feito por fora.")+`
+  <div class="kpis">${kpi("Pedidos",list.length,tot+" placas")}${kpi("Na gráfica",list.filter(s=>s.status==="ativo"&&s.etapa===2).length,"pedidos em produção")}${kpi("Margem das placas",brlc(list.filter(s=>s.status==="ativo").reduce((a,s)=>a+nfcTotal(s,"preco")-nfcTotal(s,"custo")-feeCaptacao(s),0)),"venda − custo − comissão")}${kpi("Comissões de venda",brlc(list.filter(s=>s.status==="ativo").reduce((a,s)=>a+feeCaptacao(s),0)),"em R$ por placa")}</div>
+  <div class="tablewrap"><table><thead><tr><th>Cliente</th><th>Placas</th><th>Vendedor</th><th>Andamento</th><th class="num">Venda</th><th class="num">Custo</th><th class="num">Comissão</th><th class="num">Névora</th></tr></thead>
+  <tbody>${list.map(s=>`<tr data-open="${s.c.id}"><td><b>${esc(s.c.nome)}</b><br><span class="sub">${esc(s.desc)||esc(s.c.cidade)}</span></td><td>${nfcResumo(s)}</td><td>${esc(origemTxt(s))}</td>
+    <td>${s.status==="pendente"?'<span class="chip wa">Aguardando aprovação</span>':`<div class="steps">${TEAMS.nfc.etapas.map((e,i)=>`<i class="${i<=s.etapa?"on":""}" title="${e}"></i>`).join("")}</div><span class="sub">${etapaNome(s)}</span>`}</td>
+    <td class="num">${brlc(nfcTotal(s,"preco"))}</td><td class="num">${brlc(nfcTotal(s,"custo"))}</td><td class="num">${brlc(feeCaptacao(s))}</td><td class="num">${brlc(nfcTotal(s,"preco")-nfcTotal(s,"custo")-feeCaptacao(s))}</td></tr>`).join("")}</tbody></table></div>`;
+}
+
+/* ---------- clientes ---------- */
+function viewClientes(){
+  const q=state.q||"";
+  const vis=state.clientes.filter(c=>isGestao()||c.servicos.some(s=>participa(s,state.me)));
+  const list=vis.filter(c=>!q||(c.nome+c.ig+c.cidade+c.seg+c.contato).toLowerCase().includes(q.toLowerCase()));
+  return header("Clientes",`${list.length} clientes`)+`
+  <div class="filters"><input id="q" placeholder="Buscar por nome, @instagram, cidade, contato…" value="${esc(q)}"></div>
+  <div class="tablewrap"><table><thead><tr><th>Cliente</th><th>Status</th><th>Serviços</th><th>Maturidade</th><th>Captação</th><th class="num">Mensal</th></tr></thead>
+  <tbody>${list.map(c=>`<tr data-open="${c.id}"><td><b>${esc(c.nome)}</b><br><span class="sub">${c.ig?"@"+esc(c.ig):"sem Instagram"} · ${esc(c.cidade)}</span></td>
+    <td>${c.status}</td><td><div class="meta">${c.servicos.map(s=>`<span class="chip team" style="${tc(s.equipe)}">${svNome(s)}${s.status==="pendente"?" · aguardando":""}</span>`).join("")}</div></td>
+    <td><span class="score">${dots(score(c))}${score(c)}/5</span></td><td>${[...new Set(c.servicos.map(origemTxt))].map(esc).join(", ")}</td>
+    <td class="num">${brl(c.servicos.filter(s=>s.status==="ativo").reduce((a,s)=>a+(+s.mensal||0),0))}</td></tr>`).join("")}</tbody></table></div>`;
+}
+
+/* ---------- aprovações (Gestão) ---------- */
+function linhasPrevia(sv){const p=previa(sv);const li=(L,suf)=>L.map(l=>`<li>${esc(nomeBenef(l))}${l.natureza==="captacao"?" (captação)":""}: <b>${brlc(l.valor)}</b>${suf}</li>`).join("");return `<ul>${li(p.proj,"")}${li(p.mens," por mês")}</ul>`}
+function viewAprovacoes(){
+  const pend=allSv().filter(s=>s.status==="pendente"),rec=allSv().filter(s=>s.status==="recusado");
+  return header("Aprovações","Projetos lançados pela equipe. A comissão só passa a valer depois da sua aprovação.")+
+  (pend.map(s=>`<div class="panel aprov" style="${tc(s.equipe)}"><div class="row" style="justify-content:space-between;align-items:start">
+    <div><h2>${esc(s.c.nome)} · ${svNome(s)}</h2><p class="sub">Lançado por ${esc(s.criadoPor)} · captação: <b>${esc(origemTxt(s))}</b>${captacaoFixa(s)?" · comissão de captação "+brlc(feeCaptacao(s)):""}</p>
+    <p class="sub">${s.equipe==="nfc"?nfcResumo(s)+" · venda "+brlc(nfcTotal(s,"preco"))+" · custo "+brlc(nfcTotal(s,"custo")):"Projeto "+brl(s.unico)+(s.parcelas>1?" em "+s.parcelas+"x":"")}${s.mensal?" · mensalidade "+brl(s.mensal):""}${s.equipe==="estrutura"?" · equipe: "+s.devs.join(", "):""}</p>${s.desc?`<p class="sub">${esc(s.desc)}</p>`:""}</div>
+    <div class="row"><button class="btn" data-recusar="${s.c.id}:${s.id}">Recusar</button><button class="btn primary" data-aprovar="${s.c.id}:${s.id}">Aprovar</button></div></div>
+    <div class="diag"><b>Quando o cliente pagar</b>${linhasPrevia(s)}</div></div>`).join("")||'<div class="panel empty">Nenhum projeto aguardando aprovação.</div>')+
+  (rec.length?`<div class="panel"><h2>Recusados</h2><ul class="alerts">${rec.map(s=>`<li><span class="d late">Recusado</span><span><b>${esc(s.c.nome)}</b> · ${svNome(s)} · ${esc(s.motivoRecusa||"")}</span></li>`).join("")}</ul></div>`:"");
+}
+
+/* ---------- financeiro (cobranças) ---------- */
+function viewFinanceiro(){
+  const f=state.fPag||"abertas";
+  const list=[...state.pag].sort((a,b)=>a.venc.localeCompare(b.venc)).filter(p=>f==="todas"||(f==="abertas"?["aberta","parcial"].includes(p.status):pStatus(p)===f));
+  const sum=st=>state.pag.filter(p=>pStatus(p)===st).reduce((a,p)=>a+(st==="pago"?cents(p.valor):saldoPag(state,p)),0);
+  return header("Financeiro","Cobranças emitidas e recebimentos confirmados. Comissão só nasce de recebimento confirmado.")+`
+  <div class="kpis">${kpi("Atrasado",brlc(sum("atrasado")),state.pag.filter(p=>pStatus(p)==="atrasado").length+" cobranças","late")}${kpi("Vence hoje",brlc(sum("hoje")),"")}${kpi("A vencer",brlc(sum("pendente")),"próximas cobranças")}${kpi("Já recebido",brlc(sum("pago")),"cobranças quitadas")}</div>
+  <div class="tabs" role="tablist">${[["abertas","Em aberto"],["atrasado","Atrasadas"],["pago","Pagas"],["todas","Todas"]].map(([k,l])=>`<button role="tab" data-fpag="${k}" aria-selected="${k===f}">${l}</button>`).join("")}</div>
+  <div class="tablewrap"><table><thead><tr><th>Vencimento</th><th>Cliente</th><th>Cobrança</th><th class="num">Valor</th><th class="num">Saldo</th><th>Status</th><th></th></tr></thead>
+  <tbody>${list.map(p=>{const st=pStatus(p),recs=state.rec.filter(r=>r.pag===p.id&&!r.estorno_de&&!state.rec.some(e=>e.estorno_de===r.id));return `<tr><td class="${st==="atrasado"?"late":st==="hoje"?"today":""}" style="font-family:var(--mono)">${fmtD(p.venc)}</td><td><a href="#" data-open="${p.cli}" style="color:inherit">${esc(cliById(p.cli).nome)}</a></td><td>${esc(p.desc)}</td><td class="num">${brl(p.valor)}</td><td class="num">${brlc(saldoPag(state,p))}</td><td>${pill(st)}${p.status==="parcial"?' <span class="chip wa">Parcial</span>':""}</td>
+    <td class="row" style="justify-content:flex-start">${["aberta","parcial"].includes(p.status)?`<button class="btn sm primary" data-receber="${p.id}">Registrar recebimento</button>`:""}${recs.length?`<button class="btn sm" data-estornar="${recs[recs.length-1].id}">Estornar</button>`:""}</td></tr>`}).join("")||'<tr><td colspan="7" class="empty">Nenhuma cobrança neste filtro.</td></tr>'}</tbody></table></div>`;
+}
+
+/* ---------- comissões (Gestão) ---------- */
+function viewComissoes(){
+  const F=state.fc||(state.fc={benef:"",cli:"",origem:"",status:"",de:"",ate:""});
+  const todas=[...state.com,...previstas()];
+  const passa=l=>(!F.benef||chaveBenef(l)===F.benef)&&(!F.cli||l.cli===+F.cli)&&(!F.origem||l.origem===F.origem)&&(!F.status||l.status===F.status)&&(!F.de||l.comp>=F.de)&&(!F.ate||l.comp<=F.ate);
+  const list=todas.filter(passa).filter(l=>l.benef!=="nevora"||F.mostrarNevora);
+  const reais=state.com.filter(passa);
+  const nev=reais.filter(l=>l.benef==="nevora"||(l.benef!=="nevora"&&l.status==="cancelada")).reduce((a,l)=>a+l.valor,0);
+  const pessoas=reais.filter(l=>l.benef!=="nevora"&&l.status!=="cancelada").reduce((a,l)=>a+l.valor,0);
+  const somaSt=st=>todas.filter(passa).filter(l=>l.benef!=="nevora"&&st.includes(l.status)).reduce((a,l)=>a+l.valor,0);
+  const recs=state.rec.filter(r=>(!F.de||r.em.slice(0,7)>=F.de)&&(!F.ate||r.em.slice(0,7)<=F.ate));
+  const recTipo=t=>recs.filter(r=>state.pag.find(x=>x.id===r.pag).tipo===t).reduce((a,r)=>a+r.valor,0);
+  const custos=recs.reduce((a,r)=>a+r.imp+r.tax+r.custo,0),receb=recs.reduce((a,r)=>a+r.valor,0);
+  const sel=state.selRep||[],selTot=state.com.filter(c=>sel.includes(c.id)).reduce((a,c)=>a+c.valor,0);
+  const benefs=[...COLABS.map(n=>["c:"+n,n]),...state.parceiros.map(p=>["p:"+p.id,p.nome+" (parceiro)"])];
+  const opt=(id,lab,arr,cur)=>`<label class="field"><span>${lab}</span><select id="${id}"><option value="">Todos</option>${arr.map(([v,l])=>`<option value="${v}" ${String(v)===String(cur)?"selected":""}>${l}</option>`).join("")}</select></label>`;
+  return header("Comissões",`Regra v${REGRA.versao}: projeto de produção ${REGRA.projNevora/100}% Névora e ${REGRA.projDevs/100}% entre os devs marcados. Mensalidade captada por dev: ${REGRA.mensCaptador/100}% para ele. Captação de outro setor, parceiro e venda de NFC: valor fixo em R$.`)+`
+  <div class="kpis">${kpi("Projetos recebidos",brlc(recTipo("Único")),"valor bruto")}${kpi("Recorrente recebida",brlc(recTipo("Mensal")),"mensalidades")}${kpi("Total Névora",brlc(nev),"parcela da empresa")}${kpi("Total equipe e parceiros",brlc(pessoas),"comissões geradas")}</div>
+  <div class="kpis">${kpi("Pendentes",brlc(somaSt(["prevista","pendente"])),"aguardando o cliente pagar")}${kpi("Liberadas",brlc(somaSt(["liberada"])),"recebidas, falta transferir")}${kpi("Pagas",brlc(somaSt(["paga"])),"transferidas")}${kpi("Custos diretos e margem",brlc(custos),`margem da Névora: ${receb?Math.round(100*nev/receb):0}% do recebido`)}</div>
+  <div class="panel"><div class="filters fgrid">
+    ${opt("fcBenef","Beneficiário",benefs,F.benef)}${opt("fcCli","Cliente",state.clientes.map(c=>[c.id,c.nome]),F.cli)}${opt("fcOrigem","Origem",Object.entries(ORIGENS),F.origem)}${opt("fcStatus","Status",Object.entries(ST_COM),F.status)}
+    <label class="field"><span>De (competência)</span><input type="month" id="fcDe" value="${F.de}"></label><label class="field"><span>Até</span><input type="month" id="fcAte" value="${F.ate}"></label>
+    <label class="field"><span>&nbsp;</span><label class="row" style="justify-content:flex-start;gap:6px"><input type="checkbox" id="fcNev" style="width:auto" ${F.mostrarNevora?"checked":""}>Mostrar parcela da Névora</label></label>
+  </div></div>
+  ${sel.length?`<div class="panel row" style="justify-content:space-between"><span><b>${sel.length}</b> comissões de <b>${esc(nomeBenef(state.com.find(c=>c.id===sel[0])))}</b> · ${brlc(selTot)}</span><span class="row"><button class="btn" data-act="limparSel">Limpar</button><button class="btn primary" data-act="repasse">Registrar repasse</button></span></div>`:""}
+  <div class="tablewrap"><table style="min-width:1100px"><thead><tr><th></th><th>Cliente</th><th>Serviço</th><th>Tipo</th><th>Beneficiário</th><th>Captação</th><th class="num">Base</th><th class="num">%</th><th class="num">Valor</th><th>Competência</th><th>Recebido em</th><th>Status</th></tr></thead>
+  <tbody>${list.sort((a,b)=>(b.comp+(b.em||"")).localeCompare(a.comp+(a.em||""))).map(l=>{const c=cliById(l.cli),s=svById(c,l.sv),pode=!l.prev&&l.benef!=="nevora"&&["liberada","ajustada"].includes(l.status)&&!l.repasse;return `<tr>
+    <td>${pode?`<input type="checkbox" style="width:auto" data-sel="${l.id}" aria-label="Selecionar" ${sel.includes(l.id)?"checked":""}>`:""}</td>
+    <td><a href="#" data-open="${c.id}" style="color:inherit">${esc(c.nome)}</a></td><td>${s?svNome(s):"—"}</td><td>${l.tipo==="projeto"?"Projeto":"Mensalidade"}${l.natureza==="captacao"?" · captação":""}</td>
+    <td>${l.benef==="nevora"?"<b>Névora</b>":esc(nomeBenef(l))}</td><td>${s?esc(origemTxt(s)):""}</td>
+    <td class="num">${brlc(l.base)}</td><td class="num">${pctTxt(l.pct)}</td><td class="num ${l.valor<0?"late":""}">${brlc(l.valor)}</td><td>${fmtD(l.comp)}</td><td>${l.em?fmtD(l.em):"—"}</td><td>${pillCom(l.status)}</td></tr>`}).join("")||'<tr><td colspan="12" class="empty">Nenhuma comissão com esses filtros.</td></tr>'}</tbody></table></div>
+  <div class="panel"><h2>Repasses registrados</h2><div class="tablewrap" style="border:0"><table style="min-width:0"><thead><tr><th>Data</th><th>Para</th><th>Forma</th><th>Referência</th><th class="num">Valor</th></tr></thead><tbody>${state.rep.map(r=>`<tr><td>${fmtD(r.em)}</td><td>${esc(r.chave.startsWith("p:")?parceiroNome(+r.chave.slice(2))+" (parceiro)":r.chave.slice(2))}</td><td>${esc(r.forma)}</td><td style="font-family:var(--mono)">${esc(r.ref)||"—"}</td><td class="num">${brlc(r.valor)}</td></tr>`).join("")||'<tr><td colspan="5" class="empty">Nenhum repasse ainda.</td></tr>'}</tbody></table></div></div>`;
+}
+
+/* ---------- meu financeiro ---------- */
+function viewMeuFin(){
+  const eu=state.me,mes=d(0).slice(0,7);
+  const minhas=state.com.filter(c=>c.colab===eu),prev=previstas().filter(p=>p.colab===eu),reps=state.rep.filter(r=>r.chave==="c:"+eu);
+  const meus=allSv().filter(s=>participa(s,eu));
+  const recebido=s=>minhas.filter(l=>l.sv===s.id&&l.cli===s.c.id).reduce((a,l)=>a+l.valor,0);
+  const previsto=s=>s.status==="pendente"?[...previa(s).proj,...previa(s).mens.map(l=>({...l,valor:0}))].filter(l=>l.colab===eu).reduce((a,l)=>a+l.valor,0):prev.filter(l=>l.sv===s.id&&l.cli===s.c.id&&l.tipo==="projeto").reduce((a,l)=>a+l.valor,0);
+  const papel=s=>[(s.devs||[]).includes(eu)?"produção":"",s.captador===eu?"captação":"",s.resp===eu&&s.equipe!=="estrutura"?"responsável":""].filter(Boolean).join(" e ")||"lançou";
+  return header("Meu financeiro","Só você e a Gestão veem estes valores.")+`
+  <div class="kpis">${kpi("Recebido no mês",brlc(reps.filter(r=>r.em.slice(0,7)===mes).reduce((a,r)=>a+r.valor,0)),"transferências confirmadas")}${kpi("Total acumulado",brlc(reps.reduce((a,r)=>a+r.valor,0)),reps.length+" repasses")}${kpi("Liberado",brlc(minhas.filter(c=>["liberada","ajustada"].includes(c.status)&&!c.repasse).reduce((a,c)=>a+c.valor,0)),"cliente já pagou, falta transferir")}${kpi("Previsto",brlc(prev.reduce((a,p)=>a+p.valor,0)),prev.filter(p=>p.status==="pendente").length+" cobranças do cliente atrasadas")}</div>
+  <div class="panel"><h2>Meus projetos</h2><div class="tablewrap" style="border:0"><table style="min-width:680px"><thead><tr><th>Cliente</th><th>Serviço</th><th>Minha participação</th><th>Situação</th><th class="num">Recebido</th><th class="num">Previsto do projeto</th></tr></thead><tbody>${meus.map(s=>`<tr data-open="${s.c.id}"><td><b>${esc(s.c.nome)}</b></td><td>${svNome(s)}</td><td>${papel(s)}</td><td>${s.status==="pendente"?'<span class="chip wa">Aguardando aprovação</span>':s.status==="recusado"?'<span class="chip no">Recusado</span>':etapaNome(s)}</td><td class="num">${brlc(recebido(s))}</td><td class="num">${brlc(previsto(s))}</td></tr>`).join("")||'<tr><td colspan="6" class="empty">Nenhum projeto ainda.</td></tr>'}</tbody></table></div></div>
+  <div class="grid2">
+    <div class="panel"><h2>Próximos pagamentos previstos</h2><ul class="alerts">${prev.sort((a,b)=>a.venc.localeCompare(b.venc)).slice(0,8).map(p=>`<li><span class="d ${p.status==="pendente"?"late":""}">${fmtD(p.venc)}</span><span><b>${esc(cliById(p.cli).nome)}</b> · ${p.natureza==="captacao"?"captação":p.tipo} · ${brlc(p.valor)}${p.status==="pendente"?" · cliente em atraso":""}</span></li>`).join("")||"<li>Nada previsto.</li>"}</ul></div>
+    <div class="panel"><h2>Histórico de repasses</h2><ul class="alerts">${reps.map(r=>`<li><span class="d">${fmtD(r.em)}</span><span>${brlc(r.valor)} · ${esc(r.forma)} ${r.ref?"· "+esc(r.ref):""}</span></li>`).join("")||"<li>Nenhum repasse ainda.</li>"}</ul></div>
+  </div>
+  <div class="panel"><h2>Detalhamento dos cálculos</h2><div class="tablewrap" style="border:0"><table style="min-width:720px"><thead><tr><th>Recebido em</th><th>Cliente</th><th>Tipo</th><th>Cálculo</th><th class="num">Valor</th><th>Status</th></tr></thead><tbody>${minhas.slice().reverse().map(l=>{const c=cliById(l.cli),r=state.rec.find(x=>x.id===l.rec);return `<tr><td>${fmtD(l.em)}</td><td>${esc(c.nome)}</td><td>${l.natureza==="captacao"?"Captação":l.tipo==="projeto"?"Projeto":"Mensalidade"}</td><td class="sub">${l.ajuste_de?"Estorno do lançamento original":l.natureza==="captacao"?`Valor fixo combinado, proporcional ao que o cliente pagou (${brlc(r.valor)})`:`Recebido ${brlc(r.valor)} − impostos, taxas e custos ${brlc(r.imp+r.tax+r.custo)} = base ${brlc(l.base)} × ${pctTxt(l.pct)}`}</td><td class="num ${l.valor<0?"late":""}">${brlc(l.valor)}</td><td>${pillCom(l.status)}</td></tr>`}).join("")||'<tr><td colspan="6" class="empty">Nenhum lançamento ainda.</td></tr>'}</tbody></table></div></div>`;
+}
+
+/* ---------- render ---------- */
+function render(){
+  if(!isGestao()&&["financeiro","comissoes","aprovacoes"].includes(state.view))state.view="tarefas";
+  if(isGestao()&&state.view==="meufin")state.view="comissoes";
+  document.querySelectorAll("#nav button").forEach(b=>{b.setAttribute("aria-current",b.dataset.view===state.view);const g=b.dataset.only;b.hidden=g==="gestao"?!isGestao():g==="colab"?isGestao():false});
+  $("#cTar").textContent=state.tar.filter(t=>t.status!=="concluida"&&(isGestao()?tarAtrasada(t):(t.resp===state.me))).length||"";
+  $("#cApr").textContent=allSv().filter(s=>s.status==="pendente").length||"";
+  $("#cFin").textContent=state.pag.filter(p=>pStatus(p)==="atrasado").length||"";
+  $("#cCom").textContent=state.com.filter(c=>c.status==="liberada"&&c.benef!=="nevora"&&!c.repasse).length||"";
+  $("#me").innerHTML=PEOPLE.map(p=>`<option value="${p.nome}" ${p.nome===state.me?"selected":""}>${p.nome}${p.equipe?" · "+TEAMS[p.equipe].nome:" (vê tudo)"}</option>`).join("");
+  const V={tarefas:viewTarefas,geral:viewGeral,producao:viewProducao,nfc:viewNfc,clientes:viewClientes,aprovacoes:viewAprovacoes,financeiro:viewFinanceiro,comissoes:viewComissoes,meufin:viewMeuFin};
+  $("#main").innerHTML=(V[state.view]||viewGeral)();
+  bindDnD();
+}
+
+/* ---------- lançar projeto ---------- */
+let lanc;
+function abrirLancamento(cliId){
+  lanc={cli:cliId||"",novoCli:"",tipo:"",origem:isGestao()?"gestor":"eu",captador:"",parceiro:"",novoParceiro:"",unico:0,parcelas:1,mensal:0,dia:10,fee:0,devs:[...DEVS],nfc:[],desc:"",atualiza:"nevora",inicio:d(0)};
+  drawLancamento();
+}
+function svDoLanc(){
+  const k=cat(lanc.tipo)||{equipe:"estrutura"};
+  const origem=lanc.origem==="eu"?"colaborador":lanc.origem==="outro"?"colaborador":lanc.origem;
+  return {tipo:lanc.tipo,equipe:k.equipe,origem,captador:lanc.origem==="eu"?state.me:lanc.origem==="outro"?lanc.captador:null,parceiro:lanc.origem==="parceiro"?(+lanc.parceiro||-1):null,
+    unico:k.equipe==="nfc"?lanc.nfc.reduce((a,n)=>a+n.q*(+n.preco||0),0):+lanc.unico||0,parcelas:+lanc.parcelas||1,mensal:+lanc.mensal||0,fee:+lanc.fee||0,devs:k.equipe==="estrutura"?lanc.devs:[],nfc:lanc.nfc};
+}
+function drawLancamento(){
+  const L=lanc,k=cat(L.tipo),sv=svDoLanc(),pv=L.tipo?previa(sv):null,fixa=L.tipo&&captacaoFixa({...sv,fee:sv.equipe==="nfc"?0:Math.max(+L.fee,0.01)})||(L.tipo&&sv.equipe==="nfc"&&["colaborador","parceiro"].includes(sv.origem));
+  const meu=pv?[...pv.proj.map(l=>({...l,m:false})),...pv.mens.map(l=>({...l,m:true}))].filter(l=>!isGestao()&&l.colab===state.me):[];
+  const origens=[...(isGestao()?[]:[["eu","Eu captei"]]),["nevora","Névora (site, Instagram, WhatsApp)"],["gestor","Gestor"],["outro","Outro colaborador"],["parceiro","Parceiro ou indicador"]];
+  $("#layer").innerHTML=`<div class="scrim" data-close></div><form class="drawer" id="lf" autocomplete="off">
+    <div class="dhead"><div><h2>Lançar projeto</h2><p class="sub">${isGestao()?"Lançado pela Gestão já entra aprovado.":"Vai para a Gestão aprovar. A comissão só vale depois da aprovação."}</p></div><button type="button" class="btn" data-close>Fechar</button></div>
+    <div class="form">
+      <label class="field full"><span>Cliente</span><select id="l-cli" data-l="cli"><option value="">Novo cliente…</option>${state.clientes.filter(c=>isGestao()||c.servicos.some(s=>participa(s,state.me))).map(c=>`<option value="${c.id}" ${String(c.id)===String(L.cli)?"selected":""}>${esc(c.nome)}</option>`).join("")}</select></label>
+      ${L.cli?"":`<label class="field full"><span>Nome do novo cliente</span><input id="l-novocli" data-l="novoCli" value="${esc(L.novoCli)}" placeholder="Ex.: Pizzaria Bella Massa"></label>`}
+      <label class="field full"><span>Serviço</span><select id="l-tipo" data-l="tipo"><option value="">Escolha…</option>${Object.entries(TEAMS).map(([t,x])=>`<optgroup label="${x.nome}">${CATALOG.filter(c=>c.equipe===t).map(c=>`<option value="${c.id}" ${c.id===L.tipo?"selected":""}>${c.nome}</option>`).join("")}</optgroup>`).join("")}</select></label>
+      ${k?.desc?`<p class="hint full">${k.desc}</p>`:""}
+      <h3 class="full">Quem captou o cliente</h3>
+      <div class="field full"><div class="seg wrap">${origens.map(([v,l])=>`<label><input type="radio" name="l-origem" data-l="origem" value="${v}" ${v===L.origem?"checked":""}>${l}</label>`).join("")}</div></div>
+      ${L.origem==="outro"?`<label class="field full"><span>Colaborador que captou</span><select id="l-cap" data-l="captador"><option value="">Escolha…</option>${COLABS.filter(n=>n!==state.me).map(n=>`<option ${n===L.captador?"selected":""}>${n}</option>`).join("")}</select></label>`:""}
+      ${L.origem==="parceiro"?`<label class="field"><span>Parceiro</span><select id="l-par" data-l="parceiro"><option value="">Novo parceiro…</option>${state.parceiros.map(p=>`<option value="${p.id}" ${String(p.id)===String(L.parceiro)?"selected":""}>${esc(p.nome)}</option>`).join("")}</select></label>${L.parceiro?"":`<label class="field"><span>Nome do parceiro</span><input id="l-novopar" data-l="novoParceiro" value="${esc(L.novoParceiro)}"></label>`}`:""}
+      ${L.tipo&&sv.equipe!=="nfc"&&(L.origem==="parceiro"||(["eu","outro"].includes(L.origem)&&!(sv.equipe==="estrutura"&&DEVS.includes(sv.captador))))&&(L.origem!=="outro"||L.captador)?`<label class="field full"><span>Comissão de captação (R$)</span><input id="l-fee" data-l="fee" type="number" min="0" step="10" value="${L.fee}"><span class="hint">Valor fixo combinado para quem trouxe o cliente. Sai da parte da Névora, conforme o cliente paga o projeto.</span></label>`:""}
+      ${L.tipo&&sv.equipe==="estrutura"&&["eu","outro"].includes(L.origem)&&DEVS.includes(sv.captador)?`<p class="hint full">Captado por alguém da produção: ${REGRA.mensCaptador/100}% de cada mensalidade vai para ${esc(sv.captador)}.</p>`:""}
+      ${L.tipo&&sv.equipe==="estrutura"?`<h3 class="full">Quem vai produzir</h3><div class="field full"><div class="checks">${DEVS.map((n,i)=>`<label><input type="checkbox" id="l-dev${i}" data-dev="${n}" ${L.devs.includes(n)?"checked":""}>${n}</label>`).join("")}</div><span class="hint">Os ${REGRA.projDevs/100}% da produção são divididos igualmente entre os marcados.</span></div>`:""}
+      ${L.tipo&&sv.equipe==="nfc"?`<h3 class="full">Placas</h3><div class="full tablewrap"><table style="min-width:640px"><thead><tr><th>Tipo</th><th class="num">Qtd</th><th class="num">Custo un.</th><th class="num">Venda un.</th><th class="num">Comissão un.</th><th></th></tr></thead><tbody>
+        ${L.nfc.map((n,i)=>`<tr><td><select data-nfc="${i}" data-k="t" style="min-width:150px">${NFC_TIPOS.map(t=>`<option value="${t.id}" ${t.id===n.t?"selected":""}>${t.nome}</option>`).join("")}</select></td>${["q","custo","preco","com"].map(f=>`<td><input type="number" min="0" step="${f==="q"?1:0.5}" data-nfc="${i}" data-k="${f}" value="${n[f]}" style="width:80px"></td>`).join("")}<td><button type="button" class="btn sm" data-nfcrm="${i}">Tirar</button></td></tr>`).join("")}
+        </tbody></table></div><div class="row full" style="justify-content:space-between"><button type="button" class="btn sm" data-act="nfcadd">Adicionar placa</button><span class="sub">Venda ${brlc(nfcTotal(sv,"preco"))} · custo ${brlc(nfcTotal(sv,"custo"))} · comissão ${brlc(nfcTotal(sv,"com"))}</span></div>`:""}
+      ${L.tipo&&sv.equipe!=="nfc"?`<label class="field"><span>Valor do projeto (R$)</span><input id="l-unico" data-l="unico" type="number" min="0" step="50" value="${L.unico}"></label><label class="field"><span>Parcelas</span><input id="l-parc" data-l="parcelas" type="number" min="1" max="12" value="${L.parcelas}"></label>`:""}
+      ${L.tipo?`<label class="field"><span>Mensalidade (R$, opcional)</span><input id="l-mensal" data-l="mensal" type="number" min="0" step="0.1" value="${L.mensal}"></label><label class="field"><span>Dia de vencimento</span><input id="l-dia" data-l="dia" type="number" min="1" max="28" value="${L.dia}"></label>`:""}
+      ${L.tipo==="cardapio"?`<div class="field full"><span>Quem atualiza preços e itens?</span><div class="seg"><label><input type="radio" name="l-atu" data-l="atualiza" value="nevora" ${L.atualiza==="nevora"?"checked":""}>Névora atualiza</label><label><input type="radio" name="l-atu" data-l="atualiza" value="cliente" ${L.atualiza==="cliente"?"checked":""}>Cliente atualiza (mais barato)</label></div></div>`:""}
+      ${L.tipo?`<label class="field full"><span>${sv.equipe==="nfc"?"Automação personalizada / descrição":"Descrição"}</span><textarea id="l-desc" data-l="desc">${esc(L.desc)}</textarea></label>`:""}
+    </div>
+    ${pv&&(pv.proj.length||pv.mens.length)?`<div class="diag preview">${!isGestao()?`<b>Você vai receber ${brlc(meu.filter(l=>!l.m).reduce((a,l)=>a+l.valor,0))}${meu.some(l=>l.m)?` + ${brlc(meu.filter(l=>l.m).reduce((a,l)=>a+l.valor,0))} por mês`:""}</b>`:"<b>Distribuição quando o cliente pagar</b>"}${linhasPrevia({...sv,parceiro:sv.parceiro})}<span class="hint">Antes de impostos e taxas do pagamento.${sv.equipe==="nfc"?" O custo das placas já foi descontado.":""}</span></div>`:""}
+    <p class="hint late" id="lErr" hidden></p>
+    <div class="row"><button type="button" class="btn" data-close>Cancelar</button><button class="btn primary" type="submit">${isGestao()?"Lançar e aprovar":"Enviar para aprovação"}</button></div>
+  </form>`;
+  $("#lf").addEventListener("submit",e=>{e.preventDefault();enviarLancamento()});
+}
+function enviarLancamento(){
+  const L=lanc,err=t=>{$("#lErr").textContent=t;$("#lErr").hidden=false};
+  if(!L.cli&&!L.novoCli.trim())return err("Escolha o cliente ou escreva o nome do novo cliente.");
+  if(!L.tipo)return err("Escolha o serviço.");
+  if(L.origem==="outro"&&!L.captador)return err("Escolha o colaborador que captou.");
+  if(L.origem==="parceiro"&&!L.parceiro&&!L.novoParceiro.trim())return err("Escolha ou cadastre o parceiro.");
+  const sv=svDoLanc();
+  if(sv.equipe==="estrutura"&&!L.devs.length)return err("Marque pelo menos um desenvolvedor.");
+  if(sv.equipe==="nfc"&&!L.nfc.length)return err("Adicione as placas do pedido.");
+  if(!sv.unico&&!sv.mensal)return err("Informe o valor do projeto ou a mensalidade.");
+  if(captacaoFixa(sv)&&sv.unico>0&&feeCaptacao(sv)>(sv.equipe==="estrutura"?cents(sv.unico)*REGRA.projNevora/10000:cents(sv.unico)-nfcTotal(sv,"custo")))return err("A comissão de captação passa da parte da Névora no projeto.");
+  let c=L.cli?cliById(+L.cli):null;
+  if(!c){c={id:Math.max(0,...state.clientes.map(x=>x.id))+1,nome:L.novoCli.trim(),seg:"",cidade:"",contato:"",ig:"",seg_ig:0,site:"nao",wpp:"comum",wppNum:"",status:"Em negociação",obs:"",servicos:[],hist:[{em:d(0),txt:"Cliente cadastrado por "+state.me}]};state.clientes.push(c)}
+  if(L.origem==="parceiro"&&!L.parceiro){const p={id:Math.max(0,...state.parceiros.map(x=>x.id))+1,nome:L.novoParceiro.trim()};state.parceiros.push(p);sv.parceiro=p.id}
+  const s={...sv,id:Math.max(0,...allSv().map(x=>x.id))+1,resp:sv.equipe==="estrutura"?L.devs[0]:(person(state.me)?.equipe===sv.equipe?state.me:COLABS.find(n=>person(n).equipe===sv.equipe)||state.me),etapa:0,dia:+L.dia||10,inicio:L.inicio,desc:L.desc,status:"pendente",criadoPor:state.me,atualiza:L.tipo==="cardapio"?L.atualiza:undefined,grafica:sv.equipe==="nfc"?"Gráfica Ponto Certo":undefined};
+  c.servicos.push(s);c.hist.push({em:d(0),txt:state.me+" lançou "+svNome(s)+" · captação: "+origemTxt(s)});log("lançou "+svNome(s)+" para "+c.nome);
+  if(isGestao())ativarServico(state,c,s);
+  save();closeDrawer();render();toast(isGestao()?"Projeto lançado e aprovado":"Enviado para a Gestão aprovar");
+}
+
+/* ---------- janelas financeiras ---------- */
+function modal(titulo,corpo,onOk,okTxt){
+  $("#layer").innerHTML=`<div class="scrim" data-close></div><form class="drawer narrow" id="mf" autocomplete="off"><div class="dhead"><h2>${titulo}</h2><button type="button" class="btn" data-close>Fechar</button></div>${corpo}<p class="hint late" id="mErr" hidden></p><div class="row"><button type="button" class="btn" data-close>Cancelar</button><button class="btn primary" type="submit">${okTxt}</button></div></form>`;
+  $("#mf").addEventListener("submit",e=>{e.preventDefault();const r=onOk(new FormData(e.target));if(r&&r.erro){$("#mErr").textContent=r.erro;$("#mErr").hidden=false;return}save();closeDrawer();render()});
+}
+function abrirRecebimento(pid){
+  const p=state.pag.find(x=>x.id===pid),c=cliById(p.cli),s=svById(c,p.sv),saldo=saldoPag(state,p);
+  modal("Registrar recebimento",`<p class="sub"><b>${esc(c.nome)}</b> · ${esc(p.desc)} · saldo ${brlc(saldo)}</p>
+  <div class="form">
+    <label class="field"><span>Valor recebido (R$)</span><input id="r-valor" name="valor" type="number" step="0.01" min="0.01" value="${(saldo/100).toFixed(2)}" required></label>
+    <label class="field"><span>Data</span><input id="r-em" name="em" type="date" value="${d(0)}"></label>
+    <label class="field"><span>Impostos (R$)</span><input id="r-imp" name="imp" type="number" step="0.01" min="0" value="0"></label>
+    <label class="field"><span>Taxas do pagamento (R$)</span><input id="r-tax" name="tax" type="number" step="0.01" min="0" value="0"></label>
+    <label class="field"><span>Custos diretos (R$)</span><input id="r-custo" name="custo" type="number" step="0.01" min="0" placeholder="${s.equipe==="nfc"?"Automático: custo das placas":"0"}"></label>
+    <label class="field"><span>Forma</span><select id="r-forma" name="forma"><option>PIX</option><option>Boleto</option><option>Cartão</option><option>Transferência</option><option>Dinheiro</option></select></label>
+    <label class="field full"><span>Referência da transação</span><input id="r-ref" name="ref" placeholder="ID do banco ou gateway: evita registrar duas vezes"></label>
+  </div>`,
+  fd=>receber(state,pid,{valor:fd.get("valor"),imp:fd.get("imp"),tax:fd.get("tax"),custo:fd.get("custo"),forma:fd.get("forma"),ref:fd.get("ref").trim(),em:fd.get("em")}),"Confirmar recebimento");
+}
+function abrirEstorno(rid){
+  const r=state.rec.find(x=>x.id===rid),p=state.pag.find(x=>x.id===r.pag);
+  modal("Estornar recebimento",`<p class="sub">${esc(cliById(p.cli).nome)} · ${esc(p.desc)} · ${brlc(r.valor)} recebido em ${fmtD(r.em)}</p><p class="hint">O lançamento original fica no histórico. São criados ajustes negativos para todos que receberam.</p><label class="field"><span>Motivo</span><textarea id="e-motivo" name="motivo" required placeholder="Ex.: chargeback do cartão"></textarea></label>`,
+  fd=>{const m=fd.get("motivo").trim();if(m.length<5)return {erro:"Descreva o motivo do estorno."};return estornar(state,rid,m)},"Estornar");
+}
+function abrirRepasse(){
+  const ids=state.selRep||[],l0=state.com.find(c=>c.id===ids[0]),tot=state.com.filter(c=>ids.includes(c.id)).reduce((a,c)=>a+c.valor,0);
+  modal("Registrar repasse",`<p class="sub">${esc(nomeBenef(l0))} · ${ids.length} comissões · <b>${brlc(tot)}</b></p><p class="hint">Só marque como pago depois que a transferência for feita.</p>
+  <div class="form"><label class="field"><span>Data da transferência</span><input id="p-em" name="em" type="date" value="${d(0)}"></label><label class="field"><span>Forma</span><select id="p-forma" name="forma"><option>PIX</option><option>Transferência</option><option>Dinheiro</option></select></label>
+  <label class="field full"><span>Referência da transação</span><input id="p-ref" name="ref"></label></div>`,
+  fd=>{const r=repassar(state,chaveBenef(l0),ids,{em:fd.get("em"),forma:fd.get("forma"),ref:fd.get("ref").trim()});if(r.ok)state.selRep=[];return r},"Confirmar repasse");
+}
+function abrirRecusa(cid,sid){
+  const c=cliById(cid),s=svById(c,sid);
+  modal("Recusar projeto",`<p class="sub">${esc(c.nome)} · ${svNome(s)} · lançado por ${esc(s.criadoPor)}</p><label class="field"><span>Motivo (aparece para quem lançou)</span><textarea id="x-motivo" name="motivo" required></textarea></label>`,
+  fd=>{const m=fd.get("motivo").trim();if(m.length<5)return {erro:"Escreva o motivo."};s.status="recusado";s.motivoRecusa=m;c.hist.push({em:d(0),txt:"Gestão recusou "+svNome(s)+": "+m});log("recusou "+svNome(s)+" de "+c.nome);return {ok:1}},"Recusar");
+}
+
+/* ---------- ficha do cliente ---------- */
+let draft;
+function openClient(id){draft=structuredClone(cliById(id));drawDrawer()}
+function drawDrawer(){
+  const c=draft,G=isGestao(),pode=G||c.servicos.some(s=>s.criadoPor===state.me);
+  const radio=(name,opts)=>`<div class="seg">${opts.map(([v,l])=>`<label><input type="radio" name="${name}" value="${v}" ${c[name]===v?"checked":""}>${l}</label>`).join("")}</div>`;
+  const servs=c.servicos.filter(s=>G||participa(s,state.me));
+  $("#layer").innerHTML=`<div class="scrim" data-close></div>
+  <form class="drawer" id="cf" autocomplete="off">
+    <div class="dhead"><div><h2>${esc(c.nome)}</h2><p class="sub">${c.status}</p></div><button type="button" class="btn" data-close>Fechar</button></div>
+    <fieldset class="form" ${pode?"":"disabled"} style="border:0;padding:0;margin:0">
+      <label class="field full"><span>Nome do cliente / empresa</span><input id="f-nome" name="nome" required value="${esc(c.nome)}"></label>
+      <label class="field"><span>Segmento</span><input id="f-seg" name="seg" value="${esc(c.seg)}"></label>
+      <label class="field"><span>Cidade</span><input id="f-cidade" name="cidade" value="${esc(c.cidade)}"></label>
+      <label class="field"><span>Pessoa de contato</span><input id="f-contato" name="contato" value="${esc(c.contato)}"></label>
+      <label class="field"><span>Status</span><select id="f-status" name="status">${STATUS_CLI.map(o=>`<option ${o===c.status?"selected":""}>${o}</option>`).join("")}</select></label>
+      <label class="field"><span>Instagram (@)</span><input id="f-ig" name="ig" value="${esc(c.ig)}"></label>
+      <label class="field"><span>Seguidores</span><input id="f-segig" name="seg_ig" type="number" min="0" value="${c.seg_ig}"></label>
+      <div class="field full"><span>Tem site?</span>${radio("site",[["sim","Sim"],["desatualizado","Desatualizado"],["nao","Não"]])}</div>
+      <div class="field full"><span>WhatsApp</span>${radio("wpp",[["business","Business"],["comum","Comum"],["nao","Não tem"]])}</div>
+      <label class="field full"><span>Número do WhatsApp</span><input id="f-wppnum" name="wppNum" value="${esc(c.wppNum)}"></label>
+    </fieldset>
+    <div class="row" style="justify-content:space-between"><h3>Projetos</h3><button type="button" class="btn sm" data-act="lancarCli">Lançar projeto para este cliente</button></div>
+    <div class="svlist">${servs.map(s=>{const ts=state.tar.filter(t=>t.sv===s.id&&t.cli===c.id);return `<div class="svitem" style="${tc(s.equipe)}"><div><div class="t">${svNome(s)} ${s.status==="pendente"?'<span class="chip wa">Aguardando aprovação</span>':s.status==="recusado"?'<span class="chip no">Recusado</span>':""}</div>
+      <div class="s">Captação: <b>${esc(origemTxt(s))}</b>${captacaoFixa(s)?" ("+brlc(feeCaptacao(s))+")":""} · lançado por ${esc(s.criadoPor)}${s.equipe==="estrutura"?"<br>Produção: "+s.devs.join(", "):""}${s.nfc?"<br>"+nfcResumo(s):""}${s.status==="ativo"?" · <b>"+etapaNome(s)+"</b>":""}${s.motivoRecusa?"<br>Motivo: "+esc(s.motivoRecusa):""}</div>
+      ${ts.length?`<ul class="minitasks">${ts.map(t=>`<li class="${t.status==="concluida"?"done":""}"><button type="button" class="linkbtn" data-tarefa="${t.id}">${esc(t.titulo)}</button> <span class="sub">${t.resp?esc(t.resp.split(" ")[0]):"livre"} · ${fmtD(t.prazo)}</span></li>`).join("")}</ul>`:""}</div>
+      <div class="v">${s.equipe==="nfc"?brlc(nfcTotal(s,"preco"))+" venda<br>":s.unico?brl(s.unico)+" projeto<br>":""}${s.mensal?brl(s.mensal)+"/mês":"sem mensalidade"}</div></div>`}).join("")||'<p class="hint">Nenhum projeto ainda.</p>'}</div>
+    ${G?`<h3>Cobranças</h3><div class="tablewrap"><table style="min-width:0"><tbody>${state.pag.filter(p=>p.cli===c.id).sort((a,b)=>b.venc.localeCompare(a.venc)).map(p=>`<tr><td style="font-family:var(--mono)">${fmtD(p.venc)}</td><td>${esc(p.desc)}</td><td class="num">${brl(p.valor)}</td><td>${pill(pStatus(p))}</td></tr>`).join("")||'<tr><td class="empty">Sem cobranças.</td></tr>'}</tbody></table></div>`:""}
+    <label class="field"><span>Observações</span><textarea id="f-obs" name="obs" ${pode?"":"disabled"}>${esc(c.obs)}</textarea></label>
+    ${c.hist.length?`<h3>Histórico</h3><ul class="hist">${c.hist.slice().reverse().map(h=>`<li><time>${fmtD(h.em)}</time>${esc(h.txt)}</li>`).join("")}</ul>`:""}
+    <div class="row"><button type="button" class="btn" data-close>${pode?"Cancelar":"Fechar"}</button>${pode?'<button class="btn primary" type="submit">Salvar</button>':""}</div>
+  </form>`;
+  $("#cf").addEventListener("submit",e=>{e.preventDefault();const fd=new FormData(e.target);["nome","seg","cidade","contato","status","ig","site","wpp","wppNum","obs"].forEach(k=>{if(fd.has(k))draft[k]=fd.get(k).toString().trim()});draft.seg_ig=+fd.get("seg_ig")||0;const i=state.clientes.findIndex(x=>x.id===draft.id);state.clientes[i]={...state.clientes[i],...draft,servicos:state.clientes[i].servicos};save();closeDrawer();render();toast("Cliente salvo")});
+}
+function closeDrawer(){$("#layer").innerHTML="";draft=null}
+
+/* ---------- arrastar e soltar ---------- */
+function bindDnD(){
+  document.querySelectorAll(".card").forEach(el=>el.addEventListener("dragstart",e=>e.dataTransfer.setData("text/plain",el.dataset.sv)));
+  document.querySelectorAll(".col").forEach(col=>{
+    col.addEventListener("dragover",e=>{e.preventDefault();col.classList.add("over")});
+    col.addEventListener("dragleave",()=>col.classList.remove("over"));
+    col.addEventListener("drop",e=>{e.preventDefault();col.classList.remove("over");
+      const [cid,sid]=e.dataTransfer.getData("text/plain").split(":").map(Number);const c=cliById(cid),s=svById(c,sid);const et=+col.dataset.etapa;
+      if(s&&s.etapa!==et){s.etapa=et;c.hist.push({em:d(0),txt:state.me+" moveu "+svNome(s)+" para "+etapaNome(s)});log("moveu "+svNome(s)+" de "+c.nome);save();render();toast("Movido para "+etapaNome(s))}});
+  });
+}
+
+/* ---------- eventos ---------- */
+document.addEventListener("click",e=>{
+  const t=e.target;
+  const v=t.closest("[data-view]");if(v){state.view=v.dataset.view;save();render();return}
+  const tm=t.closest("[data-team]");if(tm){state.team=tm.dataset.team;render();return}
+  const fp=t.closest("[data-fpag]");if(fp){state.fPag=fp.dataset.fpag;render();return}
+  const rb=t.closest("[data-receber]");if(rb){abrirRecebimento(+rb.dataset.receber);return}
+  const es=t.closest("[data-estornar]");if(es){abrirEstorno(+es.dataset.estornar);return}
+  const ap=t.closest("[data-aprovar]");if(ap){const [ci,si]=ap.dataset.aprovar.split(":").map(Number);const c=cliById(ci);ativarServico(state,c,svById(c,si));save();render();toast("Projeto aprovado: cobranças e tarefas criadas");return}
+  const rc=t.closest("[data-recusar]");if(rc){const [ci,si]=rc.dataset.recusar.split(":").map(Number);abrirRecusa(ci,si);return}
+  const sl=t.closest("[data-sel]");if(sl){const id=+sl.dataset.sel,linha=state.com.find(c=>c.id===id);let s=state.selRep||[];
+    if(sl.checked){if(s.length&&chaveBenef(state.com.find(c=>c.id===s[0]))!==chaveBenef(linha)){s=[];toast("Repasse é por pessoa: seleção anterior limpa")}s=[...s,id]}else s=s.filter(x=>x!==id);state.selRep=s;render();return}
+  const td=t.closest("[data-tdone]");if(td){const x=state.tar.find(y=>y.id===+td.dataset.tdone);setStatusTarefa(x,td.checked?"concluida":"a_fazer");return}
+  const as=t.closest("[data-assumir]");if(as){const x=state.tar.find(y=>y.id===+as.dataset.assumir);x.resp=state.me;log("assumiu "+x.titulo);save();render();toast("Tarefa com você");return}
+  const tr=t.closest("[data-tarefa]");if(tr){abrirTarefa(+tr.dataset.tarefa);return}
+  const cm=t.closest("[data-comentar]");if(cm){const x=state.tar.find(y=>y.id===+cm.dataset.comentar),txt=$("#t-com").value.trim();if(!txt)return;x.comentarios.push({autor:state.me,texto:txt,em:d(0)});save();abrirTarefa(x.id);return}
+  const at=t.closest("[data-apagartar]");if(at){state.tar=state.tar.filter(y=>y.id!==+at.dataset.apagartar);save();closeDrawer();render();return}
+  const nr=t.closest("[data-nfcrm]");if(nr){lanc.nfc.splice(+nr.dataset.nfcrm,1);drawLancamento();return}
+  const act=t.closest("[data-act]")?.dataset.act;
+  if(act==="limparSel"){state.selRep=[];render();return}
+  if(act==="repasse"){abrirRepasse();return}
+  if(act==="lancar"){abrirLancamento();return}
+  if(act==="lancarCli"){abrirLancamento(draft.id);return}
+  if(act==="novaTarefa"){abrirTarefa(null);return}
+  if(act==="aprovacoes"){state.view="aprovacoes";render();return}
+  if(act==="nfcadd"){lanc.nfc.push({t:"google",q:1,...NFC_PADRAO});drawLancamento();return}
+  if(t.closest("[data-close]")){closeDrawer();return}
+  const o=t.closest("[data-open]");if(o&&!t.closest(".drawer")){e.preventDefault();openClient(+o.dataset.open)}
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer()});
+const FC={fcBenef:"benef",fcCli:"cli",fcOrigem:"origem",fcStatus:"status",fcDe:"de",fcAte:"ate"};
+function lancInput(el){
+  if(el.dataset.l){lanc[el.dataset.l]=el.value;return true}
+  if(el.dataset.dev){lanc.devs=DEVS.filter(n=>n===el.dataset.dev?el.checked:lanc.devs.includes(n));return true}
+  if(el.dataset.nfc!==undefined&&el.dataset.k){const n=lanc.nfc[+el.dataset.nfc];n[el.dataset.k]=el.dataset.k==="t"?el.value:+el.value;return true}
+  return false;
+}
+function redrawLanc(el){const id=el.id,pos=el.selectionStart,nfcKey=el.dataset.nfc!==undefined?`[data-nfc="${el.dataset.nfc}"][data-k="${el.dataset.k}"]`:null;drawLancamento();const back=id?$("#"+id):nfcKey?$(nfcKey):null;if(back&&el.type!=="radio"&&el.type!=="checkbox"&&el.tagName!=="SELECT"){back.focus();try{back.setSelectionRange(pos,pos)}catch(e){}}}
+document.addEventListener("change",e=>{
+  const el=e.target,id=el.id;
+  if(el.closest("#lf")&&lancInput(el)){redrawLanc(el);return}
+  if(id==="me"){state.me=e.target.value;state.selRep=[];state.ft=null;state.view=isGestao()?"geral":"tarefas";const t=myTeam();if(t)state.team=t;save();render()}
+  if(id==="soMeus"){state.soMeus=el.checked;render()}
+  if(id==="ftPessoa"){state.ft.pessoa=el.value;render()}
+  if(id==="ftSetor"){state.ft.setor=el.value;render()}
+  if(FC[id]){state.fc[FC[id]]=el.value;render()}
+  if(id==="fcNev"){state.fc.mostrarNevora=el.checked;render()}
+});
+document.addEventListener("input",e=>{
+  const el=e.target;
+  if(el.closest("#lf")&&(el.type==="number"||el.type==="text"||el.tagName==="TEXTAREA")){lancInput(el);if(el.type==="number")redrawLanc(el);return}
+  if(el.id==="q"){state.q=el.value;const pos=el.selectionStart;render();const q=$("#q");q.focus();q.setSelectionRange(pos,pos)}
+});
+let state;
+const save=()=>{try{localStorage.setItem("nevora-demo-v6",JSON.stringify(state))}catch(e){}};
+try{state=JSON.parse(localStorage.getItem("nevora-demo-v6"))}catch(e){}
+if(!state||!state.tar)state=seed();
+render();
+
+</script>
